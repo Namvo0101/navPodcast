@@ -368,6 +368,7 @@
     let modalActiveEpisode = null;
     let streamCandidateIndex = 0;
     let activeStreamCandidates = [];
+    let initialSeekTarget = null; // Lưu vị trí giây cần khôi phục khi tải lại trang
 
     // Hàm chuẩn hóa URL ảnh đa nguồn (Dropbox, Google Drive, Direct URL)
     function normalizeCoverUrl(url) {
@@ -426,8 +427,45 @@
       renderEpisodes();
       updateBookmarkUI();
       setupAudioEvents();
+      restorePlaybackSession(); // Khôi phục trạng thái phát dở
       lucide.createIcons();
     };
+
+    // Khôi phục phiên nghe gần nhất từ localStorage
+    function restorePlaybackSession() {
+      try {
+        const savedSession = localStorage.getItem('nav_podcast_session');
+        if (!savedSession) return;
+        const session = JSON.parse(savedSession);
+        if (!session || !session.episodeId) return;
+
+        const ep = PODCAST_DATA.find(e => e.id === session.episodeId);
+        if (!ep) return;
+
+        currentEpisode = ep;
+        initialSeekTarget = session.currentTime || 0;
+        activeStreamCandidates = getDirectStreamCandidates(ep);
+        streamCandidateIndex = 0;
+
+        // Thiết lập giao diện player
+        playerTitle.innerText = ep.title;
+        playerHost.innerText = ep.host;
+        playerCover.src = normalizeCoverUrl(ep.cover);
+        currentTimeText.innerText = formatTime(initialSeekTarget);
+        durationTimeText.innerText = ep.durationFormatted || "--:--";
+
+        // Gán sẵn nguồn audio để chuẩn bị phát tiếp
+        if (activeStreamCandidates.length > 0) {
+          audioEl.src = activeStreamCandidates[0];
+          audioEl.load();
+        }
+
+        updatePlayerBookmarkIcon();
+        renderEpisodes();
+      } catch (err) {
+        console.warn("Không thể khôi phục phiên phát trước đó:", err);
+      }
+    }
 
     // Nạp dữ liệu: Ưu tiên bộ nhớ admin đồng bộ, sau đó nạp file podcasts.json
     async function loadPodcastData() {
@@ -617,16 +655,15 @@
       // Danh sách các luồng Direct Stream tương thích
       return [
         `https://drive.usercontent.google.com/download?id=${fileId}&export=download&authuser=0`,
-        `https://docs.google.com/uc?export=download&id=${fileId}`,
-        `https://drive.google.com/uc?export=open&id=${fileId}`
+        `https://drive.google.com/uc?export=download&id=${fileId}`
       ];
     }
 
-    function playEpisodeById(id) {
+    function playEpisodeById(id, resumeAtTime = null) {
       const ep = PODCAST_DATA.find(e => e.id === id);
       if (!ep) return;
 
-      if (currentEpisode && currentEpisode.id === ep.id) {
+      if (currentEpisode && currentEpisode.id === ep.id && resumeAtTime === null) {
         togglePlay();
         return;
       }
@@ -634,6 +671,11 @@
       currentEpisode = ep;
       streamCandidateIndex = 0;
       activeStreamCandidates = getDirectStreamCandidates(ep);
+      if (resumeAtTime !== null) {
+        initialSeekTarget = resumeAtTime;
+      } else {
+        initialSeekTarget = null;
+      }
 
       loadAndPlayCandidate(0);
 
@@ -726,6 +768,13 @@
       audioEl.oncanplay = () => {
         if (!isNaN(audioEl.duration) && audioEl.duration > 0) {
           durationTimeText.innerText = formatTime(audioEl.duration);
+          // Tua đến thời điểm đã nghe dở trước khi F5
+          if (initialSeekTarget !== null && initialSeekTarget < audioEl.duration) {
+            audioEl.currentTime = initialSeekTarget;
+            seekSlider.value = (initialSeekTarget / audioEl.duration) * 100;
+            currentTimeText.innerText = formatTime(initialSeekTarget);
+            initialSeekTarget = null;
+          }
         }
       };
       
@@ -747,12 +796,22 @@
           seekSlider.value = (audioEl.currentTime / audioEl.duration) * 100;
           currentTimeText.innerText = formatTime(audioEl.currentTime);
           durationTimeText.innerText = formatTime(audioEl.duration);
+
+          // Tự động ghi nhớ vị trí phát vào localStorage
+          if (currentEpisode) {
+            localStorage.setItem('nav_podcast_session', JSON.stringify({
+              episodeId: currentEpisode.id,
+              currentTime: Math.floor(audioEl.currentTime)
+            }));
+          }
         }
       };
       audioEl.onended = () => {
         isPlaying = false;
         updatePlayStateUI();
         renderEpisodes();
+        // Xóa phiên nghe khi tập đã kết thúc trọn vẹn
+        localStorage.removeItem('nav_podcast_session');
         if (playbackQueue.length > 0) {
           const nextId = playbackQueue.shift();
           renderQueueList();
@@ -989,30 +1048,6 @@
       const mins = Math.floor(seconds / 60);
       const secs = Math.floor(seconds % 60);
       return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    }
-
-    // Hàm chuẩn hoá URL ảnh: hỗ trợ Dropbox, Google Drive và direct URL
-    function normalizeCoverUrl(url) {
-      if (!url) return "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800&auto=format&fit=crop&q=80";
-      let trimmed = url.trim();
-
-      if (trimmed.includes('dropbox.com')) {
-        trimmed = trimmed.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
-        try {
-          const parsed = new URL(trimmed);
-          parsed.searchParams.delete('dl');
-          parsed.searchParams.set('raw', '1');
-          return parsed.toString();
-        } catch(e) {
-          return trimmed.replace(/[?&]dl=[01]/g, '') + (trimmed.includes('?') ? '&raw=1' : '?raw=1');
-        }
-      }
-
-      const match = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
-      if (match && match[1]) {
-        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
-      }
-      return trimmed;
     }
   </script>
 </body>
