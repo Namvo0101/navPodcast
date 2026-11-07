@@ -91,6 +91,27 @@
 
       <!-- Tiện ích bên phải -->
       <div class="flex items-center gap-2.5">
+        <!-- Nút Làm Mới Dữ Liệu (Sync/Refresh) -->
+        <button 
+          id="refresh-btn" 
+          onclick="manualSyncPodcasts()" 
+          class="p-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 active:scale-95 transition"
+          title="Kiểm tra và cập nhật tập mới nhất"
+        >
+          <i id="refresh-btn-icon" data-lucide="refresh-cw" class="w-4 h-4 text-indigo-400"></i>
+        </button>
+
+        <!-- Nút Cài đặt App (PWA) -->
+        <button 
+          id="pwa-install-btn" 
+          onclick="triggerPWAInstall()" 
+          class="hidden px-3.5 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 text-xs font-semibold transition active:scale-95 animate-pulse"
+          title="Cài đặt Nav Podcast về điện thoại hoặc máy tính"
+        >
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Cài đặt App</span>
+        </button>
+
         <!-- Sleep Timer Indicator -->
         <button 
           id="sleep-timer-btn"
@@ -489,6 +510,34 @@
     </div>
   </div>
 
+  <!-- Modal Hướng dẫn cài đặt cho iOS / Safari -->
+  <div id="ios-pwa-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 shadow-inner">
+        <i data-lucide="smartphone" class="w-7 h-7"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-white">Cài đặt Nav Podcast vào iPhone</h3>
+        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+          Để cài đặt ứng dụng vào màn hình chính trên iOS Safari:
+        </p>
+      </div>
+      <div class="space-y-2.5 text-xs text-left bg-slate-800/60 p-3.5 rounded-2xl border border-slate-700/60">
+        <div class="flex items-center gap-2.5 text-slate-200">
+          <span class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-300 flex items-center justify-center text-[11px] font-bold">1</span>
+          <span>Nhấn vào nút <strong class="text-white">Chia sẻ</strong> (<i data-lucide="share" class="w-3.5 h-3.5 inline text-indigo-400"></i>) ở thanh dưới Safari</span>
+        </div>
+        <div class="flex items-center gap-2.5 text-slate-200">
+          <span class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-300 flex items-center justify-center text-[11px] font-bold">2</span>
+          <span>Cuộn xuống và chọn <strong class="text-white">Thêm vào MH chính (Add to Home Screen)</strong></span>
+        </div>
+      </div>
+      <button onclick="toggleIOSPWAModal()" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-semibold transition">
+        Đã hiểu
+      </button>
+    </div>
+  </div>
+
   <script>
     let PODCAST_DATA = [];
     let currentEpisode = null;
@@ -504,6 +553,9 @@
     let streamCandidateIndex = 0;
     let activeStreamCandidates = [];
     let initialSeekTarget = null; // Lưu vị trí giây cần khôi phục
+
+    // Biến quản lý PWA Install Prompt
+    let deferredPWAEvent = null;
 
     // Sleep Timer & Voice Boost variables
     let sleepTimerId = null;
@@ -588,14 +640,124 @@
     const ALL_CATEGORIES = ['Tất cả', 'Phát triển bản thân', 'Công nghệ', 'Khởi nghiệp', 'Chuyện đêm muộn'];
 
     window.onload = async () => {
+      initPWA();
       await loadPodcastData();
       renderCategories();
       renderEpisodes();
       updateBookmarkUI();
       setupAudioEvents();
+      setupAutoSyncEvents(); // Lắng nghe để tự động cập nhật khi mở lại app
       restorePlaybackSession(); // Khôi phục trạng thái phát dở
       lucide.createIcons();
     };
+
+    // Tự động kiểm tra và cập nhật khi người dùng quay lại app (chế độ PWA Standalone)
+    function setupAutoSyncEvents() {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          // Khi người dùng mở lại app từ màn hình khóa hoặc đa nhiệm
+          loadPodcastData(true);
+        }
+      });
+      window.addEventListener('focus', () => {
+        loadPodcastData(true);
+      });
+    }
+
+    // Nút làm mới thủ công trên Header
+    async function manualSyncPodcasts() {
+      const icon = document.getElementById('refresh-btn-icon');
+      if (icon) icon.classList.add('animate-spin');
+      showToast("Đang kiểm tra tập podcast mới...", "refresh-cw");
+      await loadPodcastData(false);
+      if (icon) icon.classList.remove('animate-spin');
+      showToast("Đã đồng bộ danh sách podcast mới nhất!", "check-circle");
+    }
+
+    // Khởi tạo cấu hình PWA (Manifest & Prompt cài đặt)
+    function initPWA() {
+      // 1. Tự động tiêm Web App Manifest
+      const manifestObj = {
+        name: "Nav Podcast - Audio Space",
+        short_name: "Nav Podcast",
+        description: "Ứng dụng nghe podcast khám phá tri thức và cảm hứng",
+        start_url: window.location.pathname || "/",
+        display: "standalone",
+        background_color: "#0b0f19",
+        theme_color: "#0f172a",
+        icons: [
+          {
+            src: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=512&auto=format&fit=crop&q=80",
+            sizes: "512x512",
+            type: "image/jpeg",
+            purpose: "any maskable"
+          }
+        ]
+      };
+      const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/json' });
+      const manifestUrl = URL.createObjectURL(manifestBlob);
+      const manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      manifestLink.href = manifestUrl;
+      document.head.appendChild(manifestLink);
+
+      // 2. Bắt sự kiện cài đặt của trình duyệt (Chrome, Edge, Cốc Cốc, Android)
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPWAEvent = e;
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) {
+          installBtn.classList.remove('hidden');
+        }
+      });
+
+      // 3. Nếu đang trên iOS Safari, hiển thị nút để mở hướng dẫn Add to Home Screen
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+      if (isIOS && !isStandalone) {
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) {
+          installBtn.classList.remove('hidden');
+        }
+      }
+
+      window.addEventListener('appinstalled', () => {
+        deferredPWAEvent = null;
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) installBtn.classList.add('hidden');
+        showToast("Đã cài đặt Nav Podcast thành công!", "check-circle");
+      });
+    }
+
+    function triggerPWAInstall() {
+      // Nếu là iOS Safari
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) {
+        toggleIOSPWAModal();
+        return;
+      }
+
+      // Nếu trình duyệt hỗ trợ beforeinstallprompt trực tiếp
+      if (deferredPWAEvent) {
+        deferredPWAEvent.prompt();
+        deferredPWAEvent.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            showToast("Đang tiến hành thêm ứng dụng...", "download");
+          }
+          deferredPWAEvent = null;
+          document.getElementById('pwa-install-btn').classList.add('hidden');
+        });
+      } else {
+        showToast("Để cài đặt: Bấm menu trình duyệt (⋮) -> Thêm vào màn hình chính", "info");
+      }
+    }
+
+    function toggleIOSPWAModal() {
+      const modal = document.getElementById('ios-pwa-modal');
+      modal.classList.toggle('hidden');
+      modal.classList.toggle('flex');
+      lucide.createIcons();
+    }
 
     // Khôi phục phiên nghe gần nhất từ localStorage
     function restorePlaybackSession() {
@@ -614,49 +776,62 @@
         activeStreamCandidates = getDirectStreamCandidates(ep);
         streamCandidateIndex = 0;
 
-        // Thiết lập giao diện player
+        // Thiết lập giao diện player với thông tin tập dở dang
         playerTitle.innerText = ep.title;
         playerHost.innerText = ep.host;
         playerCover.src = normalizeCoverUrl(ep.cover);
-        currentTimeText.innerText = formatTime(initialSeekTarget);
         durationTimeText.innerText = ep.durationFormatted || "--:--";
-
-        // Gán sẵn nguồn audio để chuẩn bị phát tiếp
-        if (activeStreamCandidates.length > 0) {
-          audioEl.src = activeStreamCandidates[0];
-          audioEl.load();
+        if (initialSeekTarget > 0) {
+          currentTimeText.innerText = formatTime(initialSeekTarget);
         }
-
         updatePlayerBookmarkIcon();
-        renderEpisodes();
       } catch (err) {
-        console.warn("Không thể khôi phục phiên phát trước đó:", err);
+        console.warn("Không thể khôi phục phiên nghe cũ:", err);
       }
     }
 
-    // Nạp dữ liệu: Ưu tiên bộ nhớ admin đồng bộ, sau đó nạp file podcasts.json
-    async function loadPodcastData() {
-      const localData = localStorage.getItem('nav_podcast_master_data');
-      if (localData) {
-        try {
-          PODCAST_DATA = JSON.parse(localData);
-          if (PODCAST_DATA.length > 0) {
-            initHero();
-            return;
-          }
-        } catch(e) {}
-      }
-
+    // Nạp dữ liệu: Luôn ưu tiên fetch file podcasts.json mới nhất kèm tham số chống cache (Cache-Busting)
+    async function loadPodcastData(silent = false) {
+      let isDataUpdated = false;
       try {
-        const res = await fetch('podcasts.json');
+        // Gắn timestamp ?_t=... và { cache: 'no-store' } để vượt qua browser cache khi add to home screen
+        const res = await fetch(`podcasts.json?_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
+        });
+
         if (res.ok) {
-          PODCAST_DATA = await res.json();
+          const freshData = await res.json();
+          if (Array.isArray(freshData) && freshData.length > 0) {
+            // Kiểm tra xem số lượng tập hoặc ID tập đầu có thay đổi không
+            if (JSON.stringify(freshData) !== JSON.stringify(PODCAST_DATA)) {
+              PODCAST_DATA = freshData;
+              localStorage.setItem('nav_podcast_master_data', JSON.stringify(freshData));
+              isDataUpdated = true;
+              if (silent) {
+                showToast("Đã có tập podcast mới được cập nhật!", "sparkles");
+              }
+            }
+          }
         }
       } catch(err) {
-        console.warn("Không tải được podcasts.json qua fetch trực tiếp, vui lòng mở bằng Live Server.");
+        console.warn("Không thể fetch trực tuyến podcasts.json, kiểm tra dữ liệu offline:", err);
+      }
+
+      // Nếu không fetch được từ mạng (ví dụ mất mạng), fallback về localStorage
+      if (PODCAST_DATA.length === 0) {
+        const localData = localStorage.getItem('nav_podcast_master_data');
+        if (localData) {
+          try {
+            PODCAST_DATA = JSON.parse(localData);
+          } catch(e) {}
+        }
       }
 
       initHero();
+      if (isDataUpdated) {
+        renderEpisodes();
+      }
     }
 
     function initHero() {
@@ -922,19 +1097,26 @@
       }
 
       const candidateUrl = activeStreamCandidates[index] || activeStreamCandidates[0];
-      audioEl.src = candidateUrl;
-      audioEl.load();
+      
+      // Quan trọng khi chạy nền: không reset toàn bộ thẻ audio nếu cùng chung format,
+      // chỉ gán src trực tiếp để giữ quyền audio session từ OS
+      if (audioEl.src !== candidateUrl) {
+        audioEl.src = candidateUrl;
+      }
 
+      // Kích hoạt phát và xử lý việc đánh thức âm thanh
       const playPromise = audioEl.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
             isPlaying = true;
+            if (audioCtx && audioCtx.state === 'suspended') {
+              audioCtx.resume().catch(() => {});
+            }
             updatePlayStateUI();
           })
           .catch(err => {
             console.warn("Chờ tương tác người dùng hoặc lỗi nạp luồng:", err);
-            // Nếu trình duyệt chặn autoplay hoặc link đầu bị lỗi, kiểm tra luồng tiếp theo
             if (streamCandidateIndex + 1 < activeStreamCandidates.length) {
               streamCandidateIndex++;
               loadAndPlayCandidate(streamCandidateIndex);
