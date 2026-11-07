@@ -1074,6 +1074,7 @@
         const parts = (ep.durationFormatted || '30:00').split(':');
         const estTotalSecs = (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
 
+        // Nếu đã nghe đến 95% thời lượng ước tính HOẶC đã gần cuối bài thì luôn tua về 0
         if (estTotalSecs > 0 && savedTime >= estTotalSecs * 0.95) {
           initialSeekTarget = 0;
           saveEpisodeProgress(ep.id, 0);
@@ -1251,7 +1252,13 @@
       audioEl.oncanplay = () => {
         if (!isNaN(audioEl.duration) && audioEl.duration > 0) {
           durationTimeText.innerText = formatTime(audioEl.duration);
-          if (initialSeekTarget !== null && initialSeekTarget < audioEl.duration) {
+          
+          // Kiểm tra an toàn: Nếu mốc khôi phục vượt quá hoặc nằm ở 2 giây cuối của file âm thanh thực tế
+          if (initialSeekTarget !== null) {
+            if (initialSeekTarget >= audioEl.duration - 2 || initialSeekTarget < 0) {
+              initialSeekTarget = 0;
+              if (currentEpisode) saveEpisodeProgress(currentEpisode.id, 0);
+            }
             audioEl.currentTime = initialSeekTarget;
             seekSlider.value = (initialSeekTarget / audioEl.duration) * 100;
             currentTimeText.innerText = formatTime(initialSeekTarget);
@@ -1311,11 +1318,14 @@
       audioEl.onended = () => {
         isPlaying = false;
         updatePlayStateUI();
-        renderEpisodes();
+        
+        // Luôn reset sạch tiến độ về 0 khi tập đã phát hết
         if (currentEpisode) {
           saveEpisodeProgress(currentEpisode.id, 0);
         }
         localStorage.removeItem('nav_podcast_session');
+        initialSeekTarget = 0;
+        renderEpisodes();
 
         if (sleepOnEpisodeEnd) {
           cancelSleepTimer();
