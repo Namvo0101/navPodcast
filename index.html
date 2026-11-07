@@ -1016,12 +1016,21 @@
     // Audio Playback
     // Tạo danh sách URL streaming dự phòng không bao giờ popup iframe
     function getDirectStreamCandidates(ep) {
-      const raw = (ep.rawDriveAudio || ep.audioUrl || '').trim();
+      const raw = (ep.audioUrl || ep.rawDriveAudio || '').trim();
       
-      // Xử lý link Dropbox
+      // Xử lý link Dropbox: Đảm bảo đổi www -> dl.dropboxusercontent.com và luôn gắn raw=1
       if (raw.includes('dropbox.com')) {
-        const dbxDirect = raw.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace(/[?&]dl=0/, '').replace(/[?&]raw=1/, '');
-        return [dbxDirect, raw];
+        let dbxDirect = raw.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+        try {
+          const parsed = new URL(dbxDirect);
+          parsed.searchParams.delete('dl');
+          parsed.searchParams.set('raw', '1');
+          dbxDirect = parsed.toString();
+        } catch(e) {
+          dbxDirect = dbxDirect.replace(/[?&]dl=[01]/g, '').replace(/[?&]raw=1/g, '');
+          dbxDirect += (dbxDirect.includes('?') ? '&raw=1' : '?raw=1');
+        }
+        return [dbxDirect];
       }
 
       const driveMatch = raw.match(/\/d\/([a-zA-Z0-9_-]+)/) || raw.match(/id=([a-zA-Z0-9_-]+)/);
@@ -1187,6 +1196,18 @@
             { src: normalizeCoverUrl(ep.cover), sizes: '512x512', type: 'image/jpeg' }
           ]
         });
+
+        // Chỉ định rõ ràng nguồn phát của App để OS không tự trích xuất URL lạ từ ID3 tags của MP3
+        if ('actionHandlers' in navigator.mediaSession || 'setPositionState' in navigator.mediaSession) {
+          try {
+            // Định hướng hành động quay về trang web hiện tại khi chạm vào trình phát trên màn hình khóa
+            navigator.mediaSession.setActionHandler('seekto', (details) => {
+              if (details.seekTime && audioEl.duration) {
+                audioEl.currentTime = details.seekTime;
+              }
+            });
+          } catch(e) {}
+        }
 
         navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
 
