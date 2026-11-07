@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="no-referrer">
   <title>Quản Trị Nav Podcast - Admin Studio</title>
+  
+  <!-- Favicon cho trang Admin -->
+  <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w512">
+  <link rel="apple-touch-icon" href="https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w512">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
@@ -25,8 +30,14 @@
   <header class="bg-slate-900/90 border-b border-slate-800 px-6 py-4 sticky top-0 z-30 backdrop-blur-md">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-          <i data-lucide="sliders" class="w-5 h-5 text-white"></i>
+        <!-- Logo Nav Podcast trên Header Admin -->
+        <div class="w-10 h-10 rounded-xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center shadow-lg shadow-indigo-500/10">
+          <img 
+            src="https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w256" 
+            alt="Nav Podcast Logo" 
+            class="w-full h-full object-contain p-1"
+            referrerpolicy="no-referrer"
+          />
         </div>
         <div>
           <h1 class="text-lg font-bold text-white flex items-center gap-2">
@@ -161,29 +172,28 @@
 
         <div>
           <label class="block font-semibold uppercase text-slate-400 mb-1">Người dẫn / Khách mời</label>
-          <input type="text" id="p-host" placeholder="VD: Hoàng Nam & TS. Nguyễn Văn A" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500 text-xs" />
+          <input type="text" id="p-host" placeholder="VD: Nav" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500 text-xs" />
         </div>
 
-        <!-- Google Drive Audio Link -->
+        <!-- Audio Link -->
         <div class="bg-indigo-950/20 border border-indigo-900/50 p-3.5 rounded-2xl space-y-2">
           <div class="flex items-center justify-between">
             <label class="font-semibold uppercase text-indigo-300 flex items-center gap-1.5">
               <i data-lucide="disc" class="w-4 h-4"></i>
-              Link File Audio (.mp3) *
+              Link File Audio (.mp3/.m4a) *
             </label>
-            <span class="text-[10px] text-indigo-400">Hỗ trợ Drive / Dropbox / URL trực tiếp</span>
+            <span class="text-[10px] text-indigo-400">Hỗ trợ Dropbox / Drive / Direct</span>
           </div>
           <input 
             type="text" 
             id="p-audio-drive" 
             required
-            placeholder="Dán link Google Drive, Dropbox, hoặc direct link .mp3..."
+            placeholder="Dán link Dropbox, Google Drive hoặc link audio trực tiếp..."
             class="w-full bg-slate-900 border border-indigo-800/60 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-400 text-xs font-mono"
             oninput="previewAudioConversion(this.value)"
           />
           <div id="audio-preview-hint" class="text-[11px] text-slate-400 flex items-center gap-1.5 break-all"></div>
           
-          <!-- Trình nghe thử audio ngay trong Admin -->
           <div class="pt-2 border-t border-indigo-950 flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
               <button type="button" onclick="testAudioPlay()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1">
@@ -191,7 +201,6 @@
               </button>
               <span id="test-audio-status" class="text-[11px] text-slate-400 italic">Nhấn để kiểm tra link audio</span>
             </div>
-            <!-- Tự động tính thời lượng -->
             <button type="button" onclick="detectDurationFromAudio()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 rounded-lg text-[11px] font-medium flex items-center gap-1" title="Tự động lấy độ dài file">
               <i data-lucide="clock" class="w-3 h-3"></i> Tự động tính thời lượng
             </button>
@@ -199,14 +208,14 @@
           </div>
         </div>
 
-        <!-- Google Drive Thumbnail Image Link -->
+        <!-- Cover Image Link -->
         <div class="bg-slate-800/40 border border-slate-700 p-3.5 rounded-2xl space-y-2">
           <div class="flex items-center justify-between">
             <label class="font-semibold uppercase text-slate-300 flex items-center gap-1.5">
               <i data-lucide="image" class="w-4 h-4 text-pink-400"></i>
               Link Ảnh Thumbnail *
             </label>
-            <span class="text-[10px] text-pink-400">Hỗ trợ Dropbox / Drive / URL trực tiếp</span>
+            <span class="text-[10px] text-pink-400">Hỗ trợ Dropbox / Drive / Direct</span>
           </div>
           <input 
             type="text" 
@@ -220,7 +229,7 @@
             <img 
               id="cover-preview-box" 
               referrerpolicy="no-referrer"
-              src="https://placehold.co/120x80/1e293b/64748b?text=Cover+Preview" 
+              src="https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w256" 
               onerror="this.onerror=null; this.src='https://placehold.co/120x80/1e293b/f43f5e?text=Loi+Anh';"
               class="w-16 h-12 object-cover rounded-lg border border-slate-700 bg-slate-800" 
             />
@@ -263,10 +272,7 @@
           </button>
         </div>
 
-        <!-- Danh sách thẻ -->
-        <div id="podcasts-list" class="space-y-3 mt-4 max-h-[720px] overflow-y-auto pr-1">
-          <!-- Render qua JS -->
-        </div>
+        <div id="podcasts-list" class="space-y-3 mt-4 max-h-[720px] overflow-y-auto pr-1"></div>
       </div>
     </div>
 
@@ -275,12 +281,10 @@
   <script>
     let podcasts = [];
 
-    // Bộ phân tích link audio linh hoạt (Drive, Dropbox, Direct MP3/M4A)
     function parseGoogleDriveAudio(url) {
       if (!url) return "";
       let trimmed = url.trim();
 
-      // Hỗ trợ link Dropbox: đổi sang direct stream có &raw=1
       if (trimmed.includes('dropbox.com')) {
         trimmed = trimmed
           .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
@@ -289,21 +293,17 @@
         return trimmed.includes('?') ? `${trimmed}&raw=1` : `${trimmed}?raw=1`;
       }
 
-      // Xử lý link Google Drive
       const match = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
       if (match && match[1]) {
-        // Sử dụng endpoint stream trực tiếp của Google
         return `https://drive.usercontent.google.com/download?id=${match[1]}&export=download&authuser=0`;
       }
       return trimmed;
     }
 
-    // Phân tích link Google Drive sang Thumbnail ảnh trực tiếp
     function parseGoogleDriveCover(url) {
-      if (!url) return "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800&auto=format&fit=crop&q=80";
+      if (!url) return "https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w1000";
       let trimmed = url.trim();
 
-      // Hỗ trợ link ảnh Dropbox: chuyển sang link ảnh trực tiếp chuẩn xác
       if (trimmed.includes('dropbox.com')) {
         trimmed = trimmed.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
         try {
@@ -316,7 +316,6 @@
         }
       }
 
-      // Hỗ trợ link ảnh Google Drive
       const match = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
       if (match && match[1]) {
         return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
@@ -324,7 +323,6 @@
       return trimmed;
     }
 
-    // Kiểm tra và phát thử audio trực tiếp ngay trong form
     function testAudioPlay() {
       const raw = document.getElementById('p-audio-drive').value.trim();
       const status = document.getElementById('test-audio-status');
@@ -342,7 +340,6 @@
       testAudio.oncanplay = () => {
         status.innerHTML = `<span class="text-emerald-400 font-semibold"> Link hoạt động tốt! Đang phát thử...</span>`;
         testAudio.play();
-        // Tự động gán thời lượng nếu ô thời lượng đang trống
         if (!document.getElementById('p-duration').value && testAudio.duration) {
           document.getElementById('p-duration').value = formatSecsToTime(testAudio.duration);
         }
@@ -353,7 +350,6 @@
       };
     }
 
-    // Tự động đo thời lượng của file âm thanh
     function detectDurationFromAudio() {
       const raw = document.getElementById('p-audio-drive').value.trim();
       if (!raw) {
@@ -383,9 +379,7 @@
       return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
 
-    // Khởi tạo & nạp dữ liệu
     window.onload = async () => {
-      // Ưu tiên fetch từ file podcasts.json mới nhất kèm cache-busting
       try {
         const res = await fetch(`podcasts.json?_t=${Date.now()}`, {
           cache: 'no-store',
@@ -405,7 +399,6 @@
         console.warn("Chưa đọc được file podcasts.json qua fetch trực tiếp, kiểm tra local storage.");
       }
 
-      // Fallback về local storage nếu offline
       const localData = localStorage.getItem('nav_podcast_master_data');
       if (localData) {
         try {
@@ -435,7 +428,6 @@
         return `
           <div class="p-3.5 bg-slate-800/60 border border-slate-700/70 hover:border-indigo-500/50 rounded-2xl flex items-center justify-between gap-3 transition">
             <div class="flex items-center gap-3.5 min-w-0">
-              <!-- Nút chuyển thứ tự lên/xuống -->
               <div class="flex flex-col gap-1 text-slate-500">
                 <button onclick="moveEpisode(${index}, -1)" ${index === 0 ? 'disabled class="opacity-20 cursor-not-allowed"' : 'class="hover:text-indigo-400"'} title="Đẩy lên trước">
                   <i data-lucide="chevron-up" class="w-4 h-4"></i>
@@ -448,7 +440,7 @@
               <img 
                 src="${parseGoogleDriveCover(item.cover)}" 
                 referrerpolicy="no-referrer"
-                onerror="this.onerror=null; this.src='https://placehold.co/100x100/1e293b/6366f1?text=No+Cover';"
+                onerror="this.onerror=null; this.src='https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w256';"
                 alt="cover" 
                 class="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-slate-700" 
               />
@@ -474,7 +466,6 @@
       lucide.createIcons();
     }
 
-    // Đổi thứ tự tập podcast
     function moveEpisode(index, direction) {
       const targetIndex = index + direction;
       if (targetIndex < 0 || targetIndex >= podcasts.length) return;
@@ -521,13 +512,12 @@
       const title = document.getElementById('p-title').value.trim();
       const category = document.getElementById('p-category').value;
       const duration = document.getElementById('p-duration').value.trim() || '30:00';
-      const host = document.getElementById('p-host').value.trim() || 'Nav Podcast';
+      const host = document.getElementById('p-host').value.trim() || 'Nav';
       const rawAudio = document.getElementById('p-audio-drive').value.trim();
       const rawCover = document.getElementById('p-cover-drive').value.trim();
       const desc = document.getElementById('p-desc').value.trim();
       const tsText = document.getElementById('p-timestamps').value.trim();
 
-      // Phân tích timestamps
       let timestamps = [];
       if (tsText) {
         timestamps = tsText.split('\n').map(line => {
@@ -546,7 +536,6 @@
       const streamCoverUrl = parseGoogleDriveCover(rawCover);
 
       if (editId) {
-        // Cập nhật tập cũ
         const idx = podcasts.findIndex(p => p.id === editId);
         if (idx > -1) {
           podcasts[idx] = {
@@ -563,7 +552,6 @@
           showToast('Đã cập nhật tập podcast thành công!', 'check-circle');
         }
       } else {
-        // Thêm tập mới
         const newEp = {
           id: `nav-${Date.now()}`,
           title, category, host,
@@ -622,7 +610,7 @@
     function resetForm() {
       document.getElementById('podcast-form').reset();
       document.getElementById('edit-id').value = '';
-      document.getElementById('cover-preview-box').src = 'https://placehold.co/120x80/1e293b/64748b?text=Cover+Preview';
+      document.getElementById('cover-preview-box').src = 'https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w256';
       document.getElementById('audio-preview-hint').innerHTML = '';
       document.getElementById('form-heading').innerText = "Thêm tập Podcast mới";
       document.getElementById('cancel-edit-btn').classList.add('hidden');
@@ -635,7 +623,6 @@
       document.getElementById('p-title').focus();
     }
 
-    // Modal & Cấu hình GitHub API
     function openGithubModal() {
       const config = getGithubConfig();
       document.getElementById('gh-token').value = config.token || '';
@@ -680,14 +667,12 @@
       closeGithubModal();
     }
 
-    // Chuyển chuỗi Unicode UTF-8 (hỗ trợ tiếng Việt) sang Base64 chuẩn cho GitHub API
     function utf8ToBase64(str) {
       return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
         return String.fromCharCode('0x' + p1);
       }));
     }
 
-    // Commit trực tiếp lên GitHub thông qua REST API
     async function commitToGitHub() {
       const config = getGithubConfig();
       if (!config.token || !config.owner || !config.repo) {
@@ -706,7 +691,6 @@
       const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
       try {
-        // Bước 1: Lấy SHA hiện tại của file trên GitHub (nếu file đã tồn tại)
         let currentSha = null;
         const getRes = await fetch(`${apiUrl}?ref=${branch}`, {
           headers: {
@@ -720,11 +704,9 @@
           currentSha = fileData.sha;
         }
 
-        // Bước 2: Chuẩn bị nội dung JSON đã mã hóa UTF-8 sang Base64
         const contentString = JSON.stringify(podcasts, null, 2);
         const base64Content = utf8ToBase64(contentString);
 
-        // Bước 3: Gửi PUT request để tạo commit mới
         const commitPayload = {
           message: `Cập nhật podcasts.json từ Admin Studio [${new Date().toLocaleString('vi-VN')}]`,
           content: base64Content,
@@ -760,7 +742,6 @@
       }
     }
 
-    // Xuất file podcasts.json
     function exportJSON() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(podcasts, null, 2));
       const downloadAnchor = document.createElement('a');
@@ -772,7 +753,6 @@
       showToast('Đã xuất file podcasts.json thành công!', 'download');
     }
 
-    // Nạp file JSON
     function importJSON(input) {
       if (input.files && input.files[0]) {
         const reader = new FileReader();
