@@ -367,7 +367,7 @@
       tempAudio.src = streamUrl;
       showToast("Đang phân tích độ dài file audio...", "loader");
       tempAudio.onloadedmetadata = () => {
-        if (tempAudio.duration) {
+        if (tempAudio.duration && !isNaN(tempAudio.duration)) {
           const formatted = formatSecsToTime(tempAudio.duration);
           document.getElementById('p-duration').value = formatted;
           showToast(`Đã nhận diện thời lượng: ${formatted}`, "check-circle");
