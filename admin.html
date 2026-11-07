@@ -51,14 +51,76 @@
           <span>Xuất podcasts.json</span>
         </button>
 
-        <!-- Xem trang người dùng -->
-        <a href="index.html" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition">
-          <i data-lucide="external-link" class="w-4 h-4"></i>
-          <span>Về trang chủ</span>
-        </a>
+        <!-- Cấu hình & Commit lên GitHub -->
+        <button onclick="openGithubModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition" title="Cấu hình GitHub API">
+          <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
+          <span>Cấu hình Git</span>
+        </button>
+
+        <button onclick="commitToGitHub()" id="btn-github-commit" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-purple-600/20 transition active:scale-95">
+          <i data-lucide="git-commit" class="w-4 h-4"></i>
+          <span>Commit lên GitHub</span>
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- Modal Cấu hình GitHub API -->
+  <div id="github-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden text-xs">
+      <div class="flex items-center justify-between p-5 border-b border-slate-800">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="github" class="w-4 h-4 text-purple-400"></i>
+          Cấu hình GitHub REST API
+        </h3>
+        <button onclick="closeGithubModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <p class="text-slate-400 leading-relaxed text-[11px]">
+          Thông tin cấu hình được lưu trực tiếp trên trình duyệt của bạn (Local Storage) để gửi request đẩy thẳng file <code class="text-indigo-300 font-mono">podcasts.json</code> lên GitHub mà không cần dùng terminal.
+        </p>
+
+        <div>
+          <label class="block font-semibold uppercase text-slate-400 mb-1">GitHub Personal Access Token (Classic) *</label>
+          <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono text-xs focus:outline-none focus:border-purple-500 placeholder:text-slate-600" />
+          <p class="text-[10px] text-slate-500 mt-1">Yêu cầu quyền <code class="text-purple-400">repo</code></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold uppercase text-slate-400 mb-1">Owner / Username *</label>
+            <input type="text" id="gh-owner" placeholder="VD: your-username" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono text-xs focus:outline-none focus:border-purple-500 placeholder:text-slate-600" />
+          </div>
+          <div>
+            <label class="block font-semibold uppercase text-slate-400 mb-1">Repository Name *</label>
+            <input type="text" id="gh-repo" placeholder="VD: nav-podcast" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono text-xs focus:outline-none focus:border-purple-500 placeholder:text-slate-600" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold uppercase text-slate-400 mb-1">Branch</label>
+            <input type="text" id="gh-branch" value="main" placeholder="main" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono text-xs focus:outline-none focus:border-purple-500" />
+          </div>
+          <div>
+            <label class="block font-semibold uppercase text-slate-400 mb-1">Đường dẫn file</label>
+            <input type="text" id="gh-path" value="podcasts.json" placeholder="podcasts.json" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono text-xs focus:outline-none focus:border-purple-500" />
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-800 bg-slate-950/60 flex justify-end gap-2.5">
+        <button onclick="closeGithubModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Đóng</button>
+        <button onclick="saveGithubConfig()" class="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-purple-600/30">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Lưu cấu hình</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Giao diện chính Admin -->
   <main class="max-w-7xl w-full mx-auto p-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -498,6 +560,131 @@
     function addNewBlank() {
       resetForm();
       document.getElementById('p-title').focus();
+    }
+
+    // Modal & Cấu hình GitHub API
+    function openGithubModal() {
+      const config = getGithubConfig();
+      document.getElementById('gh-token').value = config.token || '';
+      document.getElementById('gh-owner').value = config.owner || '';
+      document.getElementById('gh-repo').value = config.repo || '';
+      document.getElementById('gh-branch').value = config.branch || 'main';
+      document.getElementById('gh-path').value = config.path || 'podcasts.json';
+
+      document.getElementById('github-modal').classList.remove('hidden');
+      document.getElementById('github-modal').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeGithubModal() {
+      document.getElementById('github-modal').classList.add('hidden');
+      document.getElementById('github-modal').classList.remove('flex');
+    }
+
+    function getGithubConfig() {
+      try {
+        return JSON.parse(localStorage.getItem('nav_podcast_github_config') || '{}');
+      } catch(e) {
+        return {};
+      }
+    }
+
+    function saveGithubConfig() {
+      const token = document.getElementById('gh-token').value.trim();
+      const owner = document.getElementById('gh-owner').value.trim();
+      const repo = document.getElementById('gh-repo').value.trim();
+      const branch = document.getElementById('gh-branch').value.trim() || 'main';
+      const path = document.getElementById('gh-path').value.trim() || 'podcasts.json';
+
+      if (!token || !owner || !repo) {
+        showToast('Vui lòng điền đầy đủ Token, Owner và Repo!', 'alert-triangle');
+        return;
+      }
+
+      const config = { token, owner, repo, branch, path };
+      localStorage.setItem('nav_podcast_github_config', JSON.stringify(config));
+      showToast('Đã lưu cấu hình GitHub API thành công!', 'check-circle');
+      closeGithubModal();
+    }
+
+    // Chuyển chuỗi Unicode UTF-8 (hỗ trợ tiếng Việt) sang Base64 chuẩn cho GitHub API
+    function utf8ToBase64(str) {
+      return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+        return String.fromCharCode('0x' + p1);
+      }));
+    }
+
+    // Commit trực tiếp lên GitHub thông qua REST API
+    async function commitToGitHub() {
+      const config = getGithubConfig();
+      if (!config.token || !config.owner || !config.repo) {
+        showToast('Chưa cấu hình GitHub! Vui lòng nhấn "Cấu hình Git" trước.', 'alert-triangle');
+        openGithubModal();
+        return;
+      }
+
+      const btn = document.getElementById('btn-github-commit');
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>Đang commit...</span>`;
+      lucide.createIcons();
+
+      const { owner, repo, path, branch, token } = config;
+      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+
+      try {
+        // Bước 1: Lấy SHA hiện tại của file trên GitHub (nếu file đã tồn tại)
+        let currentSha = null;
+        const getRes = await fetch(`${apiUrl}?ref=${branch}`, {
+          headers: {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+
+        if (getRes.ok) {
+          const fileData = await getRes.json();
+          currentSha = fileData.sha;
+        }
+
+        // Bước 2: Chuẩn bị nội dung JSON đã mã hóa UTF-8 sang Base64
+        const contentString = JSON.stringify(podcasts, null, 2);
+        const base64Content = utf8ToBase64(contentString);
+
+        // Bước 3: Gửi PUT request để tạo commit mới
+        const commitPayload = {
+          message: `Cập nhật podcasts.json từ Admin Studio [${new Date().toLocaleString('vi-VN')}]`,
+          content: base64Content,
+          branch: branch
+        };
+        if (currentSha) {
+          commitPayload.sha = currentSha;
+        }
+
+        const putRes = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(commitPayload)
+        });
+
+        if (putRes.ok) {
+          showToast('Đã commit lên GitHub thành công!', 'check-circle');
+        } else {
+          const errData = await putRes.json();
+          showToast(`Lỗi GitHub: ${errData.message || 'Không thể commit'}`, 'alert-triangle');
+        }
+      } catch (err) {
+        console.error('Lỗi khi commit lên GitHub:', err);
+        showToast('Lỗi kết nối tới GitHub API!', 'alert-triangle');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        lucide.createIcons();
+      }
     }
 
     // Xuất file podcasts.json
