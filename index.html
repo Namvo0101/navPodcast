@@ -1046,7 +1046,8 @@
         saveEpisodeProgress(currentEpisode.id, audioEl.currentTime);
       }
 
-      if (currentEpisode && currentEpisode.id === ep.id && resumeAtTime === null) {
+      // Nếu đang mở chính tập này và audio đã có src sẵn sàng thì chỉ việc toggle play/pause
+      if (currentEpisode && currentEpisode.id === ep.id && resumeAtTime === null && audioEl.src && audioEl.src !== window.location.href) {
         togglePlay();
         return;
       }
@@ -1134,12 +1135,25 @@
         return;
       }
 
+      // Nếu thẻ audio chưa được nạp URL thực tế (ví dụ vừa F5 khôi phục session)
+      if (!audioEl.src || audioEl.src === window.location.href || audioEl.src === '') {
+        if (!activeStreamCandidates || activeStreamCandidates.length === 0) {
+          activeStreamCandidates = getDirectStreamCandidates(currentEpisode);
+          streamCandidateIndex = 0;
+        }
+        loadAndPlayCandidate(0);
+        return;
+      }
+
       if (audioEl.paused) {
         const playPromise = audioEl.play();
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
               isPlaying = true;
+              if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+              }
               updatePlayStateUI();
             })
             .catch(err => {
