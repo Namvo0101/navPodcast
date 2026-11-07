@@ -368,7 +368,29 @@
     let modalActiveEpisode = null;
     let streamCandidateIndex = 0;
     let activeStreamCandidates = [];
-    let initialSeekTarget = null; // Lưu vị trí giây cần khôi phục khi tải lại trang
+    let initialSeekTarget = null; // Lưu vị trí giây cần khôi phục
+
+    // Quản lý tiến độ nghe của từng tập riêng biệt
+    function getEpisodeProgressMap() {
+      try {
+        return JSON.parse(localStorage.getItem('nav_podcast_episodes_progress') || '{}');
+      } catch(e) {
+        return {};
+      }
+    }
+
+    function saveEpisodeProgress(epId, seconds) {
+      if (!epId || isNaN(seconds)) return;
+      const map = getEpisodeProgressMap();
+      map[epId] = Math.floor(seconds);
+      localStorage.setItem('nav_podcast_episodes_progress', JSON.stringify(map));
+    }
+
+    function getSavedProgressFor(epId) {
+      if (!epId) return 0;
+      const map = getEpisodeProgressMap();
+      return map[epId] || 0;
+    }
 
     // Hàm chuẩn hóa URL ảnh đa nguồn (Dropbox, Google Drive, Direct URL)
     function normalizeCoverUrl(url) {
@@ -443,7 +465,8 @@
         if (!ep) return;
 
         currentEpisode = ep;
-        initialSeekTarget = session.currentTime || 0;
+        // Lấy tiến độ đã lưu riêng của tập này
+        initialSeekTarget = getSavedProgressFor(ep.id) || session.currentTime || 0;
         activeStreamCandidates = getDirectStreamCandidates(ep);
         streamCandidateIndex = 0;
 
@@ -663,6 +686,11 @@
       const ep = PODCAST_DATA.find(e => e.id === id);
       if (!ep) return;
 
+      // Lưu lại tiến độ của tập hiện tại trước khi chuyển sang tập mới
+      if (currentEpisode && audioEl.currentTime > 0) {
+        saveEpisodeProgress(currentEpisode.id, audioEl.currentTime);
+      }
+
       if (currentEpisode && currentEpisode.id === ep.id && resumeAtTime === null) {
         togglePlay();
         return;
@@ -671,10 +699,14 @@
       currentEpisode = ep;
       streamCandidateIndex = 0;
       activeStreamCandidates = getDirectStreamCandidates(ep);
+
+      // Nếu có chỉ định thời gian cụ thể (ví dụ bấm timestamp) thì dùng thời gian đó,
+      // ngược lại tự động kiểm tra tiến độ đã lưu trước đó của tập này
       if (resumeAtTime !== null) {
         initialSeekTarget = resumeAtTime;
       } else {
-        initialSeekTarget = null;
+        const savedTime = getSavedProgressFor(ep.id);
+        initialSeekTarget = savedTime > 0 ? savedTime : null;
       }
 
       loadAndPlayCandidate(0);
@@ -768,7 +800,7 @@
       audioEl.oncanplay = () => {
         if (!isNaN(audioEl.duration) && audioEl.duration > 0) {
           durationTimeText.innerText = formatTime(audioEl.duration);
-          // Tua đến thời điểm đã nghe dở trước khi F5
+          // Tua đến thời điểm đã lưu của tập này
           if (initialSeekTarget !== null && initialSeekTarget < audioEl.duration) {
             audioEl.currentTime = initialSeekTarget;
             seekSlider.value = (initialSeekTarget / audioEl.duration) * 100;
@@ -797,11 +829,13 @@
           currentTimeText.innerText = formatTime(audioEl.currentTime);
           durationTimeText.innerText = formatTime(audioEl.duration);
 
-          // Tự động ghi nhớ vị trí phát vào localStorage
+          // Tự động ghi nhớ vị trí phát cho riêng tập này và phiên chung
           if (currentEpisode) {
+            const currentSec = Math.floor(audioEl.currentTime);
+            saveEpisodeProgress(currentEpisode.id, currentSec);
             localStorage.setItem('nav_podcast_session', JSON.stringify({
               episodeId: currentEpisode.id,
-              currentTime: Math.floor(audioEl.currentTime)
+              currentTime: currentSec
             }));
           }
         }
@@ -810,7 +844,10 @@
         isPlaying = false;
         updatePlayStateUI();
         renderEpisodes();
-        // Xóa phiên nghe khi tập đã kết thúc trọn vẹn
+        // Đặt lại tiến độ của tập về 0 khi đã nghe xong trọn vẹn
+        if (currentEpisode) {
+          saveEpisodeProgress(currentEpisode.id, 0);
+        }
         localStorage.removeItem('nav_podcast_session');
         if (playbackQueue.length > 0) {
           const nextId = playbackQueue.shift();
