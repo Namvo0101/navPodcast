@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <title>Quản Trị Nav Podcast - Admin Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    input[type=range] { accent-color: #6366f1; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- Thông báo Toast -->
+  <div id="toast" class="fixed top-5 right-5 z-50 bg-slate-900 border border-slate-700 backdrop-blur shadow-2xl px-4 py-3 rounded-xl flex items-center gap-3 transition-all duration-300 transform -translate-y-24 opacity-0 pointer-events-none">
+    <div id="toast-icon" class="text-indigo-400"></div>
+    <span id="toast-message" class="text-sm font-medium text-slate-200"></span>
+  </div>
+
+  <!-- Header Admin -->
+  <header class="bg-slate-900/90 border-b border-slate-800 px-6 py-4 sticky top-0 z-30 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i data-lucide="sliders" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white flex items-center gap-2">
+            Nav Podcast Studio
+            <span class="text-[10px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full uppercase">Admin CMS</span>
+          </h1>
+          <p class="text-xs text-slate-400">Quản lý tập podcast & xuất bản file podcasts.json</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <!-- Nạp file JSON có sẵn -->
+        <label class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold cursor-pointer flex items-center gap-1.5 transition">
+          <i data-lucide="file-up" class="w-4 h-4 text-slate-400"></i>
+          <span>Nạp JSON</span>
+          <input type="file" id="json-file-input" accept=".json" class="hidden" onchange="importJSON(this)" />
+        </label>
+
+        <!-- Xuất file JSON -->
+        <button onclick="exportJSON()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 transition active:scale-95">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Xuất podcasts.json</span>
+        </button>
+
+        <!-- Xem trang người dùng -->
+        <a href="index.html" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition">
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+          <span>Về trang chủ</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Giao diện chính Admin -->
+  <main class="max-w-7xl w-full mx-auto p-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Cột trái: Form Thêm / Chỉnh Sửa (5 Cột) -->
+    <div class="lg:col-span-5 bg-slate-900/80 border border-slate-800 rounded-3xl p-6 h-fit shadow-xl">
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+        <h2 id="form-heading" class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-5 h-5 text-indigo-400"></i>
+          Thêm tập Podcast mới
+        </h2>
+        <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs text-slate-400 hover:text-white underline">Hủy sửa</button>
+      </div>
+
+      <form id="podcast-form" onsubmit="handleSubmit(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="edit-id" value="">
+
+        <div>
+          <label class="block font-semibold uppercase text-slate-400 mb-1">Tiêu đề tập podcast *</label>
+          <input type="text" id="p-title" required placeholder="VD: Tập 04: Nghệ thuật quản lý thời gian hiệu quả" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500 text-xs placeholder:text-slate-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold uppercase text-slate-400 mb-1">Chủ đề *</label>
+            <select id="p-category" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500 text-xs">
+              <option value="Phát triển bản thân">Phát triển bản thân</option>
+              <option value="Công nghệ">Công nghệ</option>
+              <option value="Khởi nghiệp">Khởi nghiệp</option>
+              <option value="Chuyện đêm muộn">Chuyện đêm muộn</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold uppercase text-slate-400 mb-1">Thời lượng (Ước tính)</label>
+            <input type="text" id="p-duration" placeholder="VD: 28:15" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500 text-xs" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold uppercase text-slate-400 mb-1">Người dẫn / Khách mời</label>
+          <input type="text" id="p-host" placeholder="VD: Hoàng Nam & TS. Nguyễn Văn A" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500 text-xs" />
+        </div>
+
+        <!-- Google Drive Audio Link -->
+        <div class="bg-indigo-950/20 border border-indigo-900/50 p-3.5 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="font-semibold uppercase text-indigo-300 flex items-center gap-1.5">
+              <i data-lucide="disc" class="w-4 h-4"></i>
+              Link File Audio (.mp3) *
+            </label>
+            <span class="text-[10px] text-indigo-400">Hỗ trợ Drive / Dropbox / URL trực tiếp</span>
+          </div>
+          <input 
+            type="text" 
+            id="p-audio-drive" 
+            required
+            placeholder="Dán link Google Drive, Dropbox, hoặc direct link .mp3..."
+            class="w-full bg-slate-900 border border-indigo-800/60 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-400 text-xs font-mono"
+            oninput="previewAudioConversion(this.value)"
+          />
+          <div id="audio-preview-hint" class="text-[11px] text-slate-400 flex items-center gap-1.5 break-all"></div>
+          
+          <!-- Trình nghe thử audio ngay trong Admin -->
+          <div class="pt-2 border-t border-indigo-950 flex items-center gap-2">
+            <button type="button" onclick="testAudioPlay()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1">
+              <i data-lucide="play" class="w-3 h-3"></i> Nghe thử link
+            </button>
+            <span id="test-audio-status" class="text-[11px] text-slate-400 italic">Nhấn để kiểm tra link audio</span>
+            <audio id="admin-test-audio" class="hidden"></audio>
+          </div>
+        </div>
+
+        <!-- Google Drive Thumbnail Image Link -->
+        <div class="bg-slate-800/40 border border-slate-700 p-3.5 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="font-semibold uppercase text-slate-300 flex items-center gap-1.5">
+              <i data-lucide="image" class="w-4 h-4 text-pink-400"></i>
+              Link Ảnh Thumbnail *
+            </label>
+            <span class="text-[10px] text-pink-400">Hỗ trợ Dropbox / Drive / URL trực tiếp</span>
+          </div>
+          <input 
+            type="text" 
+            id="p-cover-drive" 
+            placeholder="Dán link chia sẻ ảnh Dropbox, Google Drive hoặc URL ảnh..."
+            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500 text-xs font-mono"
+            oninput="previewCoverConversion(this.value)"
+          />
+          <div id="cover-preview-hint" class="text-[11px] text-slate-400 break-all"></div>
+          <div class="flex items-center gap-3 pt-1">
+            <img 
+              id="cover-preview-box" 
+              referrerpolicy="no-referrer"
+              src="https://placehold.co/120x80/1e293b/64748b?text=Cover+Preview" 
+              onerror="this.onerror=null; this.src='https://placehold.co/120x80/1e293b/f43f5e?text=Loi+Anh';"
+              class="w-16 h-12 object-cover rounded-lg border border-slate-700 bg-slate-800" 
+            />
+            <span class="text-[11px] text-slate-400">Xem trước ảnh đại diện</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold uppercase text-slate-400 mb-1">Mô tả nội dung</label>
+          <textarea id="p-desc" rows="3" placeholder="Tóm tắt nội dung chính của tập podcast này..." class="w-full bg-slate-800/90 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-indigo-500 text-xs leading-relaxed"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-semibold uppercase text-slate-400 mb-1">Mốc thời gian (Timestamps)</label>
+          <textarea id="p-timestamps" rows="3" placeholder="Định dạng mỗi dòng: giây | Nội dung&#10;VD:&#10;0 | Lời mở đầu&#10;30 | Khái niệm chính&#10;120 | Lời khuyên kết thúc" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-indigo-500 font-mono text-xs leading-relaxed"></textarea>
+          <p class="text-[10px] text-slate-500 mt-1">Gõ số giây, dấu gạch đứng (|), sau đó đến tên mốc thời gian.</p>
+        </div>
+
+        <button type="submit" id="submit-btn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition active:scale-98">
+          <i data-lucide="save" class="w-4 h-4"></i>
+          <span>Lưu tập podcast</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Cột phải: Danh sách các tập đang có (7 Cột) -->
+    <div class="lg:col-span-7 space-y-4">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="list" class="w-5 h-5 text-indigo-400"></i>
+              Danh sách tập hiện hành
+            </h2>
+            <p id="total-badge" class="text-xs text-slate-400">Đang tải...</p>
+          </div>
+          <button onclick="addNewBlank()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-lg text-xs font-semibold flex items-center gap-1 border border-slate-700">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            Tạo mới
+          </button>
+        </div>
+
+        <!-- Danh sách thẻ -->
+        <div id="podcasts-list" class="space-y-3 mt-4 max-h-[720px] overflow-y-auto pr-1">
+          <!-- Render qua JS -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let podcasts = [];
+
+    // Bộ phân tích link audio linh hoạt (Drive, Dropbox, Direct MP3)
+    function parseGoogleDriveAudio(url) {
+      if (!url) return "";
+      const trimmed = url.trim();
+
+      // Hỗ trợ link Dropbox: đổi sang direct download stream
+      if (trimmed.includes('dropbox.com')) {
+        return trimmed.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace(/[?&]dl=0/, '').replace(/[?&]raw=1/, '');
+      }
+
+      // Xử lý link Google Drive
+      const match = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        // Sử dụng endpoint stream trực tiếp của Google
+        return `https://drive.usercontent.google.com/download?id=${match[1]}&export=download&authuser=0`;
+      }
+      return trimmed;
+    }
+
+    // Phân tích link Google Drive sang Thumbnail ảnh trực tiếp
+    function parseGoogleDriveCover(url) {
+      if (!url) return "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800&auto=format&fit=crop&q=80";
+      let trimmed = url.trim();
+
+      // Hỗ trợ link ảnh Dropbox: chuyển sang link ảnh trực tiếp chuẩn xác
+      if (trimmed.includes('dropbox.com')) {
+        trimmed = trimmed.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+        try {
+          const parsedUrl = new URL(trimmed);
+          parsedUrl.searchParams.delete('dl');
+          parsedUrl.searchParams.set('raw', '1');
+          return parsedUrl.toString();
+        } catch(e) {
+          return trimmed.replace(/[?&]dl=[01]/g, '').replace(/[?&]raw=1/g, '') + (trimmed.includes('?') ? '&raw=1' : '?raw=1');
+        }
+      }
+
+      // Hỗ trợ link ảnh Google Drive
+      const match = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+      }
+      return trimmed;
+    }
+
+    // Kiểm tra và phát thử audio trực tiếp ngay trong form
+    function testAudioPlay() {
+      const raw = document.getElementById('p-audio-drive').value.trim();
+      const status = document.getElementById('test-audio-status');
+      const testAudio = document.getElementById('admin-test-audio');
+
+      if (!raw) {
+        status.innerHTML = `<span class="text-rose-400">Vui lòng nhập link trước!</span>`;
+        return;
+      }
+
+      const streamUrl = parseGoogleDriveAudio(raw);
+      status.innerHTML = `<span class="text-yellow-400">Đang tải thử file...</span>`;
+      testAudio.src = streamUrl;
+
+      testAudio.oncanplay = () => {
+        status.innerHTML = `<span class="text-emerald-400 font-semibold"> Link hoạt động tốt! Đang phát thử...</span>`;
+        testAudio.play();
+      };
+
+      testAudio.onerror = () => {
+        status.innerHTML = `<span class="text-rose-400"> Không thể phát. Hãy thử dùng link Dropbox hoặc file MP3 trực tiếp!</span>`;
+      };
+    }
+
+    // Khởi tạo & nạp dữ liệu
+    window.onload = async () => {
+      // Ưu tiên đọc từ bộ nhớ cục bộ nếu đã từng chỉnh sửa trên trình duyệt
+      const localData = localStorage.getItem('nav_podcast_master_data');
+      if (localData) {
+        try {
+          podcasts = JSON.parse(localData);
+          renderList();
+          lucide.createIcons();
+          return;
+        } catch(e) {}
+      }
+
+      // Nếu chưa có, fetch từ file podcasts.json
+      try {
+        const res = await fetch('podcasts.json');
+        if (res.ok) {
+          podcasts = await res.json();
+          saveLocal();
+        }
+      } catch (err) {
+        console.warn("Chưa đọc được file podcasts.json qua fetch trực tiếp, sử dụng dữ liệu mặc định.");
+      }
+      renderList();
+      lucide.createIcons();
+    };
+
+    function saveLocal() {
+      localStorage.setItem('nav_podcast_master_data', JSON.stringify(podcasts));
+    }
+
+    function renderList() {
+      const listEl = document.getElementById('podcasts-list');
+      const badgeEl = document.getElementById('total-badge');
+      badgeEl.innerText = `Tổng cộng ${podcasts.length} tập trong cơ sở dữ liệu`;
+
+      if (podcasts.length === 0) {
+        listEl.innerHTML = `<div class="py-12 text-center text-slate-500 text-xs">Chưa có tập nào. Hãy thêm tập đầu tiên bằng form bên trái!</div>`;
+        return;
+      }
+
+      listEl.innerHTML = podcasts.map((item, index) => {
+        return `
+          <div class="p-3.5 bg-slate-800/60 border border-slate-700/70 hover:border-indigo-500/50 rounded-2xl flex items-center justify-between gap-3 transition">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <img 
+                src="${parseGoogleDriveCover(item.cover)}" 
+                referrerpolicy="no-referrer"
+                onerror="this.onerror=null; this.src='https://placehold.co/100x100/1e293b/6366f1?text=No+Cover';"
+                alt="cover" 
+                class="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-slate-700" 
+              />
+              <div class="min-w-0">
+                <span class="text-[10px] font-semibold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">${item.category}</span>
+                <h4 class="text-xs font-bold text-white truncate mt-1">${item.title}</h4>
+                <p class="text-[11px] text-slate-400 truncate">${item.host} • ${item.durationFormatted || '--:--'}</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <button onclick="editEpisode('${item.id}')" class="p-2 rounded-lg bg-slate-700 hover:bg-indigo-600 text-slate-200 hover:text-white transition" title="Chỉnh sửa">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteEpisode('${item.id}')" class="p-2 rounded-lg bg-slate-700 hover:bg-rose-600 text-slate-200 hover:text-white transition" title="Xóa">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function previewAudioConversion(val) {
+      const hint = document.getElementById('audio-preview-hint');
+      const direct = parseGoogleDriveAudio(val);
+      if (val.includes('drive.google.com')) {
+        hint.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-emerald-400"></i> Đã nhận diện Google Drive. Link Stream: <span class="text-indigo-300">${direct}</span>`;
+      } else if (val.trim()) {
+        hint.innerHTML = `<i data-lucide="link" class="w-3 h-3 text-slate-400"></i> Sử dụng URL trực tiếp`;
+      } else {
+        hint.innerHTML = '';
+      }
+      lucide.createIcons();
+    }
+
+    function previewCoverConversion(val) {
+      const previewImg = document.getElementById('cover-preview-box');
+      const hint = document.getElementById('cover-preview-hint');
+      const coverUrl = parseGoogleDriveCover(val);
+      previewImg.src = coverUrl;
+
+      if (val.includes('dropbox.com')) {
+        hint.innerHTML = `<span class="text-emerald-400 font-semibold flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Đã tối ưu link ảnh Dropbox trực tiếp</span>`;
+      } else if (val.includes('drive.google.com')) {
+        hint.innerHTML = `<span class="text-indigo-400 font-semibold flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Đã tối ưu link ảnh Google Drive</span>`;
+      } else {
+        hint.innerHTML = '';
+      }
+      lucide.createIcons();
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const editId = document.getElementById('edit-id').value;
+      const title = document.getElementById('p-title').value.trim();
+      const category = document.getElementById('p-category').value;
+      const duration = document.getElementById('p-duration').value.trim() || '30:00';
+      const host = document.getElementById('p-host').value.trim() || 'Nav Podcast';
+      const rawAudio = document.getElementById('p-audio-drive').value.trim();
+      const rawCover = document.getElementById('p-cover-drive').value.trim();
+      const desc = document.getElementById('p-desc').value.trim();
+      const tsText = document.getElementById('p-timestamps').value.trim();
+
+      // Phân tích timestamps
+      let timestamps = [];
+      if (tsText) {
+        timestamps = tsText.split('\n').map(line => {
+          const parts = line.split('|');
+          if (parts.length >= 2) {
+            return { time: parseInt(parts[0].trim()) || 0, text: parts[1].trim() };
+          }
+          return null;
+        }).filter(Boolean);
+      }
+      if (timestamps.length === 0) {
+        timestamps = [{ time: 0, text: "00:00 - Bắt đầu tập" }];
+      }
+
+      const streamAudioUrl = parseGoogleDriveAudio(rawAudio);
+      const streamCoverUrl = parseGoogleDriveCover(rawCover);
+
+      if (editId) {
+        // Cập nhật tập cũ
+        const idx = podcasts.findIndex(p => p.id === editId);
+        if (idx > -1) {
+          podcasts[idx] = {
+            ...podcasts[idx],
+            title, category, host,
+            durationFormatted: duration,
+            rawDriveAudio: rawAudio,
+            audioUrl: streamAudioUrl,
+            rawDriveCover: rawCover,
+            cover: streamCoverUrl,
+            description: desc,
+            timestamps
+          };
+          showToast('Đã cập nhật tập podcast thành công!', 'check-circle');
+        }
+      } else {
+        // Thêm tập mới
+        const newEp = {
+          id: `nav-${Date.now()}`,
+          title, category, host,
+          date: new Date().toLocaleDateString('vi-VN'),
+          durationFormatted: duration,
+          rawDriveAudio: rawAudio,
+          audioUrl: streamAudioUrl,
+          rawDriveCover: rawCover,
+          cover: streamCoverUrl,
+          description: desc,
+          timestamps
+        };
+        podcasts.unshift(newEp);
+        showToast('Đã thêm tập podcast mới!', 'plus-circle');
+      }
+
+      saveLocal();
+      renderList();
+      resetForm();
+    }
+
+    function editEpisode(id) {
+      const ep = podcasts.find(p => p.id === id);
+      if (!ep) return;
+
+      document.getElementById('edit-id').value = ep.id;
+      document.getElementById('p-title').value = ep.title;
+      document.getElementById('p-category').value = ep.category;
+      document.getElementById('p-duration').value = ep.durationFormatted || '';
+      document.getElementById('p-host').value = ep.host;
+      document.getElementById('p-audio-drive').value = ep.rawDriveAudio || ep.audioUrl;
+      document.getElementById('p-cover-drive').value = ep.rawDriveCover || ep.cover;
+      document.getElementById('p-desc').value = ep.description;
+      
+      const tsStr = (ep.timestamps || []).map(ts => `${ts.time} | ${ts.text}`).join('\n');
+      document.getElementById('p-timestamps').value = tsStr;
+
+      previewAudioConversion(ep.rawDriveAudio || ep.audioUrl);
+      previewCoverConversion(ep.rawDriveCover || ep.cover);
+
+      document.getElementById('form-heading').innerText = "Chỉnh sửa tập Podcast";
+      document.getElementById('cancel-edit-btn').classList.remove('hidden');
+      document.getElementById('submit-btn').innerHTML = `<i data-lucide="check" class="w-4 h-4"></i><span>Cập nhật thay đổi</span>`;
+      lucide.createIcons();
+    }
+
+    function deleteEpisode(id) {
+      if (confirm('Bạn có chắc chắn muốn xóa tập podcast này khỏi danh sách?')) {
+        podcasts = podcasts.filter(p => p.id !== id);
+        saveLocal();
+        renderList();
+        showToast('Đã xóa tập podcast!', 'trash');
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('podcast-form').reset();
+      document.getElementById('edit-id').value = '';
+      document.getElementById('cover-preview-box').src = 'https://placehold.co/120x80/1e293b/64748b?text=Cover+Preview';
+      document.getElementById('audio-preview-hint').innerHTML = '';
+      document.getElementById('form-heading').innerText = "Thêm tập Podcast mới";
+      document.getElementById('cancel-edit-btn').classList.add('hidden');
+      document.getElementById('submit-btn').innerHTML = `<i data-lucide="save" class="w-4 h-4"></i><span>Lưu tập podcast</span>`;
+      lucide.createIcons();
+    }
+
+    function addNewBlank() {
+      resetForm();
+      document.getElementById('p-title').focus();
+    }
+
+    // Xuất file podcasts.json
+    function exportJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(podcasts, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "podcasts.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('Đã xuất file podcasts.json thành công!', 'download');
+    }
+
+    // Nạp file JSON
+    function importJSON(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const imported = JSON.parse(e.target.result);
+            if (Array.isArray(imported)) {
+              podcasts = imported;
+              saveLocal();
+              renderList();
+              showToast(`Đã nạp ${podcasts.length} tập từ file JSON!`, 'check-circle');
+            } else {
+              showToast('File JSON không đúng định dạng mảng podcast!', 'alert-triangle');
+            }
+          } catch(err) {
+            showToast('Lỗi khi đọc file JSON!', 'alert-triangle');
+          }
+        };
+        reader.readAsText(input.files[0]);
+      }
+    }
+
+    function showToast(message, iconName = 'bell') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.innerText = message;
+      toastIcon.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4"></i>`;
+      lucide.createIcons();
+
+      toast.classList.remove('-translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('-translate-y-24', 'opacity-0');
+      }, 2500);
+    }
+  </script>
+</body>
+</html>

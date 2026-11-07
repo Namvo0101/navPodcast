@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <title>Nav Podcast - Khám Phá Tri Thức & Cảm Hứng Mới</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    input[type=range] { accent-color: #6366f1; }
+  </style>
+</head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- Audio Element phát thanh trực tiếp (đã bỏ chặn CORS để không bị chặn kết nối) -->
+  <audio id="main-audio" preload="metadata"></audio>
+
+  <!-- Thông báo Toast nổi -->
+  <div id="toast" class="fixed top-5 right-5 z-50 bg-slate-800/95 border border-slate-700 backdrop-blur shadow-2xl px-4 py-3 rounded-xl flex items-center gap-3 transition-all duration-300 transform -translate-y-24 opacity-0 pointer-events-none">
+    <div id="toast-icon" class="text-indigo-400"></div>
+    <span id="toast-message" class="text-sm font-medium text-slate-200"></span>
+  </div>
+
+  <!-- Header Điều Hướng -->
+  <header class="sticky top-0 z-40 bg-[#0f172a]/90 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-8 py-3.5 transition-all">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <!-- Logo -->
+      <div class="flex items-center gap-3 cursor-pointer select-none" onclick="filterCategory('Tất cả')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+          <i data-lucide="compass" class="w-6 h-6 text-white stroke-[2.5]"></i>
+        </div>
+        <div>
+          <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">
+            Nav Podcast
+          </span>
+          <span class="hidden sm:inline-block text-[10px] uppercase font-semibold text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-full ml-1 border border-brand-500/20">
+            Audio Space
+          </span>
+        </div>
+      </div>
+
+      <!-- Thanh tìm kiếm -->
+      <div class="flex-1 max-w-md relative hidden sm:block">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+        <input 
+          type="text" 
+          id="search-input" 
+          placeholder="Tìm tên tập, khách mời hoặc chủ đề..."
+          class="w-full bg-slate-900/90 text-sm text-slate-200 pl-10 pr-4 py-2 rounded-full border border-slate-700/80 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all placeholder:text-slate-500"
+          oninput="handleSearch(this.value)"
+        />
+      </div>
+
+      <!-- Tiện ích bên phải -->
+      <div class="flex items-center gap-2.5">
+        <button 
+          id="fav-filter-btn"
+          onclick="toggleBookmarkView()" 
+          class="px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-2 text-xs font-semibold transition active:scale-95"
+        >
+          <i data-lucide="bookmark" class="w-4 h-4 text-indigo-400"></i>
+          <span class="hidden md:inline">Yêu thích</span>
+          <span id="fav-count-badge" class="px-1.5 py-0.2 text-[10px] bg-brand-600 rounded-full text-white hidden">0</span>
+        </button>
+
+        <button 
+          onclick="toggleQueueDrawer()"
+          class="p-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 relative active:scale-95 transition"
+          title="Hàng đợi phát"
+        >
+          <i data-lucide="list-music" class="w-5 h-5 text-indigo-300"></i>
+          <span id="queue-indicator" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-brand-500 rounded-full border-2 border-[#0b0f19] hidden"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Thân trang chính -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 pb-36">
+    
+    <!-- Hero Banner / Featured Episode -->
+    <section id="hero-section" class="mb-8 relative rounded-3xl overflow-hidden bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-900 border border-slate-800 p-6 md:p-8 shadow-2xl">
+      <div class="absolute -right-20 -top-20 w-80 h-80 bg-brand-600/20 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div class="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-8">
+        <div class="relative group cursor-pointer flex-shrink-0" onclick="playFeatured()">
+          <img 
+            id="featured-cover" 
+            src="https://placehold.co/400x400/1e293b/6366f1?text=Loading..." 
+            alt="Featured Cover" 
+            class="w-48 h-48 md:w-56 md:h-56 rounded-2xl object-cover shadow-2xl ring-1 ring-white/10 group-hover:scale-105 transition-transform duration-300"
+          />
+          <div class="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
+            <div class="w-14 h-14 rounded-full bg-brand-500 text-white flex items-center justify-center shadow-lg">
+              <i data-lucide="play" class="w-7 h-7 fill-white translate-x-0.5"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-1 text-center md:text-left space-y-3">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>TẬP MỚI NHẤT</span>
+          </div>
+          <h1 id="featured-title" class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-snug">
+            Đang tải dữ liệu podcast...
+          </h1>
+          <p id="featured-desc" class="text-slate-400 text-sm md:text-base max-w-2xl line-clamp-2 leading-relaxed">
+            Nội dung podcast được cập nhật tự động từ cơ sở dữ liệu.
+          </p>
+
+          <div class="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-3">
+            <button 
+              id="hero-play-btn"
+              onclick="playFeatured()"
+              class="px-6 py-2.5 rounded-full bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm flex items-center gap-2.5 transition active:scale-95 shadow-lg shadow-indigo-600/30"
+            >
+              <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+              <span>Nghe ngay</span>
+            </button>
+            <button 
+              id="hero-info-btn"
+              onclick="openFeaturedDetail()"
+              class="px-5 py-2.5 rounded-full bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700 font-medium text-sm flex items-center gap-2 transition"
+            >
+              <i data-lucide="info" class="w-4 h-4"></i>
+              <span>Xem tóm tắt & timestamps</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bộ Lọc Danh Mục -->
+    <section class="mb-8">
+      <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" id="categories-container"></div>
+    </section>
+
+    <!-- Danh sách các tập Podcast -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 id="section-title" class="text-xl font-bold text-white tracking-tight">Tất cả các tập</h2>
+        <span id="episodes-count" class="text-xs text-slate-400 font-medium">0 tập</span>
+      </div>
+
+      <!-- Episode Grid -->
+      <div id="episodes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden py-16 text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-500">
+          <i data-lucide="mic-off" class="w-8 h-8"></i>
+        </div>
+        <p class="text-base font-semibold text-slate-300">Không tìm thấy tập podcast nào</p>
+        <p class="text-sm text-slate-500 mt-1">Hãy chuyển sang danh mục khác hoặc vào trang Admin để thêm tập mới.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Sticky Bottom Audio Player -->
+  <aside id="audio-player-bar" class="fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 px-4 py-3 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 md:gap-6">
+      
+      <!-- Thông tin tập đang phát -->
+      <div class="flex items-center gap-3.5 w-full md:w-1/4 min-w-0">
+        <img 
+          id="player-cover" 
+          src="https://placehold.co/100x100/1e293b/a5b4fc?text=Nav" 
+          alt="Player Track" 
+          class="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-slate-700 cursor-pointer shadow-md"
+          onclick="openActiveModal()"
+        />
+        <div class="min-w-0 flex-1">
+          <h4 id="player-title" class="text-sm font-semibold text-white truncate cursor-pointer hover:underline" onclick="openActiveModal()">
+            Chọn một tập để bắt đầu nghe
+          </h4>
+          <p id="player-host" class="text-xs text-slate-400 truncate">
+            Nav Podcast Studio
+          </p>
+        </div>
+        <button id="player-bookmark-btn" onclick="toggleCurrentBookmark()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="bookmark" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Điều khiển phát & Thanh thời gian -->
+      <div class="flex flex-col items-center gap-1.5 w-full md:w-2/4">
+        <div class="flex items-center gap-5">
+          <button onclick="seekBySeconds(-15)" class="text-slate-400 hover:text-white transition active:scale-95" title="Lùi 15s">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          </button>
+          <button onclick="playPrevEpisode()" class="text-slate-400 hover:text-white transition active:scale-95">
+            <i data-lucide="skip-back" class="w-5 h-5"></i>
+          </button>
+
+          <!-- Nút Play / Pause -->
+          <button 
+            id="play-toggle-btn"
+            onclick="togglePlay()" 
+            class="w-11 h-11 rounded-full bg-brand-500 hover:bg-brand-600 text-white flex items-center justify-center transition shadow-lg shadow-indigo-500/30 active:scale-90"
+          >
+            <i id="play-btn-icon" data-lucide="play" class="w-5 h-5 fill-white translate-x-0.5"></i>
+          </button>
+
+          <button onclick="playNextEpisode()" class="text-slate-400 hover:text-white transition active:scale-95">
+            <i data-lucide="skip-forward" class="w-5 h-5"></i>
+          </button>
+          <button onclick="seekBySeconds(30)" class="text-slate-400 hover:text-white transition active:scale-95" title="Tua 30s">
+            <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="w-full flex items-center gap-3 text-[11px] text-slate-400 font-mono select-none">
+          <span id="current-time-text">0:00</span>
+          <div class="relative flex-1 flex items-center">
+            <input 
+              type="range" 
+              id="seek-slider" 
+              min="0" 
+              max="100" 
+              value="0" 
+              class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer focus:outline-none"
+              oninput="handleSeek(this.value)"
+            />
+          </div>
+          <span id="duration-time-text">0:00</span>
+        </div>
+      </div>
+
+      <!-- Điều khiển phụ -->
+      <div class="flex items-center justify-end gap-3 w-full md:w-1/4">
+        <button 
+          id="speed-btn" 
+          onclick="cyclePlaybackSpeed()"
+          class="px-2 py-1 text-xs font-semibold rounded-md bg-slate-800 text-indigo-300 hover:bg-slate-700 border border-slate-700 transition"
+        >
+          1.0x
+        </button>
+
+        <div class="hidden sm:flex items-center gap-2">
+          <button id="mute-btn" onclick="toggleMute()" class="text-slate-400 hover:text-white">
+            <i id="volume-icon" data-lucide="volume-2" class="w-4 h-4"></i>
+          </button>
+          <input 
+            type="range" 
+            id="volume-slider" 
+            min="0" 
+            max="1" 
+            step="0.05" 
+            value="0.9" 
+            class="w-16 md:w-20 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+            oninput="handleVolume(this.value)"
+          />
+        </div>
+
+        <button onclick="toggleQueueDrawer()" class="p-1.5 text-slate-400 hover:text-indigo-400 transition" title="Hàng đợi">
+          <i data-lucide="list-video" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- Modal Chi Tiết Tập -->
+  <div id="detail-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between p-5 border-b border-slate-800">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="info" class="w-4 h-4 text-brand-500"></i>
+          Chi tiết tập Podcast
+        </h3>
+        <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-5">
+        <div class="flex flex-col sm:flex-row gap-5 items-start">
+          <img id="modal-cover" src="" class="w-full sm:w-40 aspect-square rounded-xl object-cover border border-slate-700 shadow-md" />
+          <div class="space-y-2 flex-1">
+            <span id="modal-category" class="px-2.5 py-0.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-300 text-[11px] font-semibold"></span>
+            <h2 id="modal-title" class="text-lg font-bold text-white leading-snug"></h2>
+            <p id="modal-host" class="text-xs text-slate-400"></p>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Giới thiệu tập</h4>
+          <p id="modal-desc" class="text-sm text-slate-300 leading-relaxed"></p>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Mốc thời gian (Nhấn để chuyển đoạn)</h4>
+          <div id="modal-timestamps" class="space-y-1.5"></div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-800 bg-slate-950/50 flex justify-end gap-3">
+        <button onclick="closeDetailModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Đóng</button>
+        <button id="modal-play-action-btn" class="px-5 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-semibold flex items-center gap-2">
+          <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+          <span>Phát tập này</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer Hàng Đợi (Queue) -->
+  <div id="queue-drawer" class="fixed top-0 right-0 bottom-24 w-80 sm:w-96 bg-slate-900 border-l border-slate-800 z-40 transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
+    <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="list-music" class="w-5 h-5 text-indigo-400"></i>
+        <h3 class="font-bold text-sm text-white">Hàng đợi phát</h3>
+      </div>
+      <button onclick="toggleQueueDrawer()" class="text-slate-400 hover:text-white p-1">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+    <div id="queue-list" class="flex-1 overflow-y-auto p-4 space-y-2.5"></div>
+    <div class="p-3 border-t border-slate-800 bg-slate-950/50 flex justify-between items-center text-xs text-slate-400">
+      <span id="queue-length-info">0 tập</span>
+      <button onclick="clearQueue()" class="text-red-400 hover:underline text-[11px]">Xoá hàng đợi</button>
+    </div>
+  </div>
+
+  <script>
+    let PODCAST_DATA = [];
+    let currentEpisode = null;
+    let isPlaying = false;
+    let activeCategory = 'Tất cả';
+    let searchQuery = '';
+    let isOnlyBookmarks = false;
+    let bookmarks = JSON.parse(localStorage.getItem('nav_podcast_bookmarks') || '[]');
+    let playbackQueue = [];
+    let playbackSpeeds = [1.0, 1.25, 1.5, 1.75, 2.0, 0.8];
+    let currentSpeedIdx = 0;
+    let modalActiveEpisode = null;
+    let streamCandidateIndex = 0;
+    let activeStreamCandidates = [];
+
+    // Hàm chuẩn hóa URL ảnh đa nguồn (Dropbox, Google Drive, Direct URL)
+    function normalizeCoverUrl(url) {
+      if (!url || typeof url !== 'string' || !url.trim()) {
+        return "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800&auto=format&fit=crop&q=80";
+      }
+      let trimmed = url.trim();
+
+      // Chuẩn hóa link Dropbox sang link ảnh direct
+      if (trimmed.includes('dropbox.com')) {
+        trimmed = trimmed
+          .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+          .replace(/[?&]dl=[01]/g, '')
+          .replace(/[?&]raw=1/g, '');
+        return trimmed.includes('?') ? `${trimmed}&raw=1` : `${trimmed}?raw=1`;
+      }
+
+      // Chuẩn hóa link Google Drive sang thumbnail endpoint
+      const driveMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
+      if (driveMatch && driveMatch[1]) {
+        return `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w1000`;
+      }
+
+      return trimmed;
+    }
+
+    // DOM Elements
+    const audioEl = document.getElementById('main-audio');
+    const episodesGrid = document.getElementById('episodes-grid');
+    const categoriesContainer = document.getElementById('categories-container');
+    const emptyState = document.getElementById('empty-state');
+    const episodesCount = document.getElementById('episodes-count');
+    const playBtnIcon = document.getElementById('play-btn-icon');
+    const seekSlider = document.getElementById('seek-slider');
+    const currentTimeText = document.getElementById('current-time-text');
+    const durationTimeText = document.getElementById('duration-time-text');
+    const volumeSlider = document.getElementById('volume-slider');
+    const volumeIcon = document.getElementById('volume-icon');
+    const playerTitle = document.getElementById('player-title');
+    const playerHost = document.getElementById('player-host');
+    const playerCover = document.getElementById('player-cover');
+    const playerBookmarkBtn = document.getElementById('player-bookmark-btn');
+    const speedBtn = document.getElementById('speed-btn');
+    const favCountBadge = document.getElementById('fav-count-badge');
+    const favFilterBtn = document.getElementById('fav-filter-btn');
+    const queueDrawer = document.getElementById('queue-drawer');
+    const queueList = document.getElementById('queue-list');
+    const queueIndicator = document.getElementById('queue-indicator');
+    const queueLengthInfo = document.getElementById('queue-length-info');
+
+    const ALL_CATEGORIES = ['Tất cả', 'Phát triển bản thân', 'Công nghệ', 'Khởi nghiệp', 'Chuyện đêm muộn'];
+
+    window.onload = async () => {
+      await loadPodcastData();
+      renderCategories();
+      renderEpisodes();
+      updateBookmarkUI();
+      setupAudioEvents();
+      lucide.createIcons();
+    };
+
+    // Nạp dữ liệu: Ưu tiên bộ nhớ admin đồng bộ, sau đó nạp file podcasts.json
+    async function loadPodcastData() {
+      const localData = localStorage.getItem('nav_podcast_master_data');
+      if (localData) {
+        try {
+          PODCAST_DATA = JSON.parse(localData);
+          if (PODCAST_DATA.length > 0) {
+            initHero();
+            return;
+          }
+        } catch(e) {}
+      }
+
+      try {
+        const res = await fetch('podcasts.json');
+        if (res.ok) {
+          PODCAST_DATA = await res.json();
+        }
+      } catch(err) {
+        console.warn("Không tải được podcasts.json qua fetch trực tiếp, vui lòng mở bằng Live Server.");
+      }
+
+      initHero();
+    }
+
+    function initHero() {
+      if (PODCAST_DATA.length === 0) return;
+      const feat = PODCAST_DATA[0];
+      document.getElementById('featured-cover').src = normalizeCoverUrl(feat.cover);
+      document.getElementById('featured-title').innerText = feat.title;
+      document.getElementById('featured-desc').innerText = feat.description;
+    }
+
+    function playFeatured() {
+      if (PODCAST_DATA.length > 0) {
+        playEpisodeById(PODCAST_DATA[0].id);
+      }
+    }
+
+    function openFeaturedDetail() {
+      if (PODCAST_DATA.length > 0) {
+        openDetailModal(PODCAST_DATA[0].id);
+      }
+    }
+
+    function renderCategories() {
+      categoriesContainer.innerHTML = ALL_CATEGORIES.map(cat => {
+        const isActive = activeCategory === cat;
+        return `
+          <button 
+            onclick="filterCategory('${cat}')"
+            class="px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+              isActive 
+                ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20' 
+                : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 hover:text-white border border-slate-700/50'
+            }"
+          >
+            ${cat}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function filterCategory(cat) {
+      activeCategory = cat;
+      isOnlyBookmarks = false;
+      renderCategories();
+      renderEpisodes();
+    }
+
+    function toggleBookmarkView() {
+      isOnlyBookmarks = !isOnlyBookmarks;
+      favFilterBtn.classList.toggle('bg-brand-600', isOnlyBookmarks);
+      favFilterBtn.classList.toggle('text-white', isOnlyBookmarks);
+      document.getElementById('section-title').innerText = isOnlyBookmarks ? 'Tập đã lưu yêu thích' : 'Tất cả các tập';
+      renderEpisodes();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      renderEpisodes();
+    }
+
+    function renderEpisodes() {
+      let filtered = PODCAST_DATA.filter(item => {
+        const matchCat = (activeCategory === 'Tất cả') || (item.category === activeCategory);
+        const matchSearch = item.title.toLowerCase().includes(searchQuery) || 
+                            item.description.toLowerCase().includes(searchQuery) ||
+                            item.host.toLowerCase().includes(searchQuery);
+        const matchBookmark = !isOnlyBookmarks || bookmarks.includes(item.id);
+        return matchCat && matchSearch && matchBookmark;
+      });
+
+      episodesCount.innerText = `${filtered.length} tập`;
+
+      if (filtered.length === 0) {
+        episodesGrid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      episodesGrid.innerHTML = filtered.map(item => {
+        const isCurrent = currentEpisode && currentEpisode.id === item.id;
+        const isBookmarked = bookmarks.includes(item.id);
+
+        return `
+          <div class="group bg-slate-900/60 hover:bg-slate-800/80 border ${isCurrent ? 'border-brand-500 ring-1 ring-brand-500/40' : 'border-slate-800 hover:border-slate-700'} rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between hover:shadow-xl hover:-translate-y-1">
+            <div>
+              <div class="relative rounded-xl overflow-hidden aspect-video mb-3.5 bg-slate-800 cursor-pointer" onclick="playEpisodeById('${item.id}')">
+                <img src="${normalizeCoverUrl(item.cover)}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
+                  <div class="w-12 h-12 rounded-full bg-brand-500 text-white flex items-center justify-center shadow-lg">
+                    <i data-lucide="${isCurrent && isPlaying ? 'pause' : 'play'}" class="w-5 h-5 fill-white ${isCurrent && isPlaying ? '' : 'translate-x-0.5'}"></i>
+                  </div>
+                </div>
+                <span class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur text-[11px] font-mono font-medium text-slate-200">
+                  ${item.durationFormatted || '--:--'}
+                </span>
+                <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-slate-900/85 backdrop-blur border border-slate-700/60 text-[10px] font-semibold text-brand-300">
+                  ${item.category}
+                </span>
+              </div>
+
+              <h3 class="font-bold text-slate-100 text-base leading-snug hover:text-indigo-400 transition cursor-pointer line-clamp-2" onclick="openDetailModal('${item.id}')">
+                ${item.title}
+              </h3>
+              <p class="text-xs text-slate-400 mt-1.5 flex items-center gap-1.5">
+                <i data-lucide="mic" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span class="truncate">${item.host}</span>
+              </p>
+              <p class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                ${item.description}
+              </p>
+            </div>
+
+            <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
+              <span class="text-[11px] text-slate-500">${item.date || ''}</span>
+              <div class="flex items-center gap-1">
+                <button 
+                  onclick="toggleBookmark('${item.id}')" 
+                  class="p-2 rounded-lg hover:bg-slate-700/60 transition ${isBookmarked ? 'text-amber-400' : 'text-slate-400 hover:text-white'}"
+                >
+                  <i data-lucide="bookmark" class="w-4 h-4 ${isBookmarked ? 'fill-amber-400' : ''}"></i>
+                </button>
+                <button 
+                  onclick="addToQueue('${item.id}')" 
+                  class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/60 transition"
+                  title="Thêm vào danh sách chờ"
+                >
+                  <i data-lucide="list-plus" class="w-4 h-4"></i>
+                </button>
+                <button 
+                  onclick="openDetailModal('${item.id}')" 
+                  class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/60 transition"
+                >
+                  <i data-lucide="info" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // Audio Playback
+    // Tạo danh sách URL streaming dự phòng không bao giờ popup iframe
+    function getDirectStreamCandidates(ep) {
+      const raw = (ep.rawDriveAudio || ep.audioUrl || '').trim();
+      
+      // Xử lý link Dropbox
+      if (raw.includes('dropbox.com')) {
+        const dbxDirect = raw.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace(/[?&]dl=0/, '').replace(/[?&]raw=1/, '');
+        return [dbxDirect, raw];
+      }
+
+      const driveMatch = raw.match(/\/d\/([a-zA-Z0-9_-]+)/) || raw.match(/id=([a-zA-Z0-9_-]+)/);
+      if (!driveMatch || !driveMatch[1]) {
+        return [raw]; // Không phải link drive (URL trực tiếp hoặc link local)
+      }
+      
+      const fileId = driveMatch[1];
+      // Danh sách các luồng Direct Stream tương thích
+      return [
+        `https://drive.usercontent.google.com/download?id=${fileId}&export=download&authuser=0`,
+        `https://docs.google.com/uc?export=download&id=${fileId}`,
+        `https://drive.google.com/uc?export=open&id=${fileId}`
+      ];
+    }
+
+    function playEpisodeById(id) {
+      const ep = PODCAST_DATA.find(e => e.id === id);
+      if (!ep) return;
+
+      if (currentEpisode && currentEpisode.id === ep.id) {
+        togglePlay();
+        return;
+      }
+
+      currentEpisode = ep;
+      streamCandidateIndex = 0;
+      activeStreamCandidates = getDirectStreamCandidates(ep);
+
+      loadAndPlayCandidate(0);
+
+      playerTitle.innerText = ep.title;
+      playerHost.innerText = ep.host;
+      playerCover.src = normalizeCoverUrl(ep.cover);
+      durationTimeText.innerText = ep.durationFormatted || "--:--";
+
+      updatePlayerBookmarkIcon();
+      renderEpisodes();
+    }
+
+    function loadAndPlayCandidate(index) {
+      if (!activeStreamCandidates || index >= activeStreamCandidates.length) {
+        isPlaying = false;
+        updatePlayStateUI();
+        showToast("Không thể nạp file. Hãy đảm bảo file Drive đã bật 'Bất kỳ ai có liên kết'!", "alert-triangle");
+        return;
+      }
+
+      const streamUrl = activeStreamCandidates[index];
+      audioEl.src = streamUrl;
+      audioEl.playbackRate = playbackSpeeds[currentSpeedIdx];
+      audioEl.load();
+
+      const playPromise = audioEl.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          isPlaying = true;
+          updatePlayStateUI();
+          showToast(`Đang phát: ${currentEpisode.title}`, 'play');
+        }).catch((err) => {
+          console.warn(`Luồng ${index + 1} cần tương tác hoặc thử luồng tiếp:`, err);
+        });
+      }
+    }
+
+    function togglePlay() {
+      if (!currentEpisode) {
+        playFeatured();
+        return;
+      }
+
+      if (audioEl.paused) {
+        audioEl.play().then(() => {
+          isPlaying = true;
+          updatePlayStateUI();
+        }).catch(() => {
+          // Thử sang endpoint tiếp theo nếu đang bị chặn
+          if (streamCandidateIndex + 1 < activeStreamCandidates.length) {
+            streamCandidateIndex++;
+            loadAndPlayCandidate(streamCandidateIndex);
+          }
+        });
+      } else {
+        audioEl.pause();
+        isPlaying = false;
+        updatePlayStateUI();
+      }
+      renderEpisodes();
+    }
+
+    function updatePlayStateUI() {
+      const playBtn = document.getElementById('play-toggle-btn');
+      if (isPlaying) {
+        playBtn.innerHTML = '<i id="play-btn-icon" data-lucide="pause" class="w-5 h-5 fill-white"></i>';
+      } else {
+        playBtn.innerHTML = '<i id="play-btn-icon" data-lucide="play" class="w-5 h-5 fill-white translate-x-0.5"></i>';
+      }
+      lucide.createIcons();
+    }
+
+    function setupAudioEvents() {
+      audioEl.onloadstart = () => showToast("Đang kết nối luồng audio...", "loader");
+      
+      // Đồng bộ trạng thái khi audio bắt đầu phát thực tế
+      audioEl.onplay = () => {
+        isPlaying = true;
+        updatePlayStateUI();
+        renderEpisodes();
+      };
+
+      // Đồng bộ trạng thái khi audio bị tạm dừng
+      audioEl.onpause = () => {
+        isPlaying = false;
+        updatePlayStateUI();
+        renderEpisodes();
+      };
+
+      audioEl.oncanplay = () => {
+        if (!isNaN(audioEl.duration) && audioEl.duration > 0) {
+          durationTimeText.innerText = formatTime(audioEl.duration);
+        }
+      };
+      
+      // Khi gặp lỗi luồng audio, tự động đổi phương thức hoặc thông báo rõ giải pháp
+      audioEl.onerror = (e) => {
+        console.error("Lỗi tải audio:", e);
+        if (activeStreamCandidates && streamCandidateIndex + 1 < activeStreamCandidates.length) {
+          streamCandidateIndex++;
+          loadAndPlayCandidate(streamCandidateIndex);
+        } else {
+          isPlaying = false;
+          updatePlayStateUI();
+          renderEpisodes();
+          showToast("Link file bị chặn quyền truy cập. Bạn hãy thử dùng link Dropbox hoặc MP3 trực tiếp!", "alert-triangle");
+        }
+      };
+      audioEl.ontimeupdate = () => {
+        if (!isNaN(audioEl.duration) && audioEl.duration > 0) {
+          seekSlider.value = (audioEl.currentTime / audioEl.duration) * 100;
+          currentTimeText.innerText = formatTime(audioEl.currentTime);
+          durationTimeText.innerText = formatTime(audioEl.duration);
+        }
+      };
+      audioEl.onended = () => {
+        isPlaying = false;
+        updatePlayStateUI();
+        renderEpisodes();
+        if (playbackQueue.length > 0) {
+          const nextId = playbackQueue.shift();
+          renderQueueList();
+          playEpisodeById(nextId);
+        } else {
+          playNextEpisode();
+        }
+      };
+    }
+
+    function handleSeek(val) {
+      if (audioEl.duration) {
+        audioEl.currentTime = (val / 100) * audioEl.duration;
+      }
+    }
+
+    function seekBySeconds(seconds) {
+      if (!audioEl.duration) return;
+      audioEl.currentTime = Math.min(Math.max(audioEl.currentTime + seconds, 0), audioEl.duration);
+      showToast(`${seconds > 0 ? `+${seconds}s` : `${seconds}s`}`, 'rotate-cw');
+    }
+
+    function handleVolume(val) {
+      audioEl.volume = val;
+      updateVolumeIcon(val);
+    }
+
+    function toggleMute() {
+      if (audioEl.volume > 0) {
+        audioEl.dataset.prevVol = audioEl.volume;
+        audioEl.volume = 0;
+        volumeSlider.value = 0;
+      } else {
+        const prev = parseFloat(audioEl.dataset.prevVol || 0.8);
+        audioEl.volume = prev;
+        volumeSlider.value = prev;
+      }
+      updateVolumeIcon(audioEl.volume);
+    }
+
+    function updateVolumeIcon(vol) {
+      if (vol == 0) volumeIcon.setAttribute('data-lucide', 'volume-x');
+      else if (vol < 0.5) volumeIcon.setAttribute('data-lucide', 'volume-1');
+      else volumeIcon.setAttribute('data-lucide', 'volume-2');
+      lucide.createIcons();
+    }
+
+    function cyclePlaybackSpeed() {
+      currentSpeedIdx = (currentSpeedIdx + 1) % playbackSpeeds.length;
+      const speed = playbackSpeeds[currentSpeedIdx];
+      audioEl.playbackRate = speed;
+      speedBtn.innerText = `${speed}x`;
+      showToast(`Tốc độ: ${speed}x`, 'fast-forward');
+    }
+
+    function playNextEpisode() {
+      if (!currentEpisode || PODCAST_DATA.length === 0) return;
+      const currentIndex = PODCAST_DATA.findIndex(e => e.id === currentEpisode.id);
+      const nextIndex = (currentIndex + 1) % PODCAST_DATA.length;
+      playEpisodeById(PODCAST_DATA[nextIndex].id);
+    }
+
+    function playPrevEpisode() {
+      if (!currentEpisode || PODCAST_DATA.length === 0) return;
+      const currentIndex = PODCAST_DATA.findIndex(e => e.id === currentEpisode.id);
+      const prevIndex = (currentIndex - 1 + PODCAST_DATA.length) % PODCAST_DATA.length;
+      playEpisodeById(PODCAST_DATA[prevIndex].id);
+    }
+
+    // Bookmarks
+    function toggleBookmark(id) {
+      const idx = bookmarks.indexOf(id);
+      if (idx > -1) {
+        bookmarks.splice(idx, 1);
+        showToast('Đã xóa khỏi danh sách yêu thích', 'bookmark-minus');
+      } else {
+        bookmarks.push(id);
+        showToast('Đã lưu vào danh sách yêu thích', 'bookmark-check');
+      }
+      localStorage.setItem('nav_podcast_bookmarks', JSON.stringify(bookmarks));
+      updateBookmarkUI();
+      renderEpisodes();
+      updatePlayerBookmarkIcon();
+    }
+
+    function toggleCurrentBookmark() {
+      if (currentEpisode) toggleBookmark(currentEpisode.id);
+    }
+
+    function updateBookmarkUI() {
+      favCountBadge.innerText = bookmarks.length;
+      favCountBadge.classList.toggle('hidden', bookmarks.length === 0);
+    }
+
+    function updatePlayerBookmarkIcon() {
+      if (!currentEpisode) return;
+      const isBookmarked = bookmarks.includes(currentEpisode.id);
+      playerBookmarkBtn.innerHTML = `<i data-lucide="bookmark" class="w-4 h-4 ${isBookmarked ? 'text-amber-400 fill-amber-400' : 'text-slate-400'}"></i>`;
+      lucide.createIcons();
+    }
+
+    // Queue
+    function addToQueue(id) {
+      if (!playbackQueue.includes(id)) {
+        playbackQueue.push(id);
+        showToast('Đã thêm vào hàng đợi', 'list-plus');
+        renderQueueList();
+      } else {
+        showToast('Tập này đã có trong hàng đợi', 'check');
+      }
+    }
+
+    function toggleQueueDrawer() {
+      queueDrawer.classList.toggle('translate-x-full');
+      renderQueueList();
+    }
+
+    function renderQueueList() {
+      queueIndicator.classList.toggle('hidden', playbackQueue.length === 0);
+      queueLengthInfo.innerText = `${playbackQueue.length} tập`;
+
+      if (playbackQueue.length === 0) {
+        queueList.innerHTML = `<div class="py-12 text-center text-slate-500 text-xs">Hàng đợi trống.</div>`;
+        return;
+      }
+
+      queueList.innerHTML = playbackQueue.map((id, index) => {
+        const item = PODCAST_DATA.find(e => e.id === id);
+        if (!item) return '';
+        return `
+          <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60 text-xs">
+            <div class="flex items-center gap-2.5 min-w-0 cursor-pointer" onclick="playEpisodeById('${item.id}')">
+              <span class="font-mono text-slate-500 text-[10px] w-4">${index + 1}</span>
+              <img src="${item.cover}" class="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
+              <div class="min-w-0">
+                <p class="font-semibold text-slate-200 truncate">${item.title}</p>
+                <p class="text-[10px] text-slate-400 font-mono">${item.durationFormatted || '--:--'}</p>
+              </div>
+            </div>
+            <button onclick="removeFromQueue(${index})" class="text-slate-500 hover:text-red-400 p-1">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function removeFromQueue(index) {
+      playbackQueue.splice(index, 1);
+      renderQueueList();
+    }
+
+    function clearQueue() {
+      playbackQueue = [];
+      renderQueueList();
+      showToast('Đã xóa hàng đợi', 'trash');
+    }
+
+    // Modal Timestamps
+    function openDetailModal(id) {
+      const item = PODCAST_DATA.find(e => e.id === id);
+      if (!item) return;
+
+      modalActiveEpisode = item;
+      document.getElementById('modal-cover').src = normalizeCoverUrl(item.cover);
+      document.getElementById('modal-title').innerText = item.title;
+      document.getElementById('modal-category').innerText = item.category;
+      document.getElementById('modal-host').innerText = `${item.host} • ${item.date || ''}`;
+      document.getElementById('modal-desc').innerText = item.description;
+
+      const timestampsContainer = document.getElementById('modal-timestamps');
+      timestampsContainer.innerHTML = (item.timestamps || []).map(ts => `
+        <button 
+          onclick="jumpToTimestamp(${ts.time})"
+          class="w-full text-left px-3 py-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-xs text-indigo-300 font-mono flex items-center justify-between transition group"
+        >
+          <span>${ts.text}</span>
+          <i data-lucide="play" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+      `).join('');
+
+      const playBtn = document.getElementById('modal-play-action-btn');
+      playBtn.onclick = () => {
+        playEpisodeById(item.id);
+        closeDetailModal();
+      };
+
+      document.getElementById('detail-modal').classList.remove('hidden');
+      document.getElementById('detail-modal').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function openActiveModal() {
+      if (currentEpisode) openDetailModal(currentEpisode.id);
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detail-modal').classList.add('hidden');
+      document.getElementById('detail-modal').classList.remove('flex');
+    }
+
+    function jumpToTimestamp(sec) {
+      if (!currentEpisode || currentEpisode.id !== modalActiveEpisode.id) {
+        playEpisodeById(modalActiveEpisode.id);
+      }
+      setTimeout(() => {
+        audioEl.currentTime = sec;
+        closeDetailModal();
+      }, 200);
+    }
+
+    function showToast(message, iconName = 'bell') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.innerText = message;
+      toastIcon.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4"></i>`;
+      lucide.createIcons();
+
+      toast.classList.remove('-translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('-translate-y-24', 'opacity-0');
+      }, 2500);
+    }
+
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return "0:00";
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    // Hàm chuẩn hoá URL ảnh: hỗ trợ Dropbox, Google Drive và direct URL
+    function normalizeCoverUrl(url) {
+      if (!url) return "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800&auto=format&fit=crop&q=80";
+      let trimmed = url.trim();
+
+      if (trimmed.includes('dropbox.com')) {
+        trimmed = trimmed.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+        try {
+          const parsed = new URL(trimmed);
+          parsed.searchParams.delete('dl');
+          parsed.searchParams.set('raw', '1');
+          return parsed.toString();
+        } catch(e) {
+          return trimmed.replace(/[?&]dl=[01]/g, '') + (trimmed.includes('?') ? '&raw=1' : '?raw=1');
+        }
+      }
+
+      const match = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+      }
+      return trimmed;
+    }
+  </script>
+</body>
+</html>
