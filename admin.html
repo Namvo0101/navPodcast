@@ -275,14 +275,18 @@
   <script>
     let podcasts = [];
 
-    // Bộ phân tích link audio linh hoạt (Drive, Dropbox, Direct MP3)
+    // Bộ phân tích link audio linh hoạt (Drive, Dropbox, Direct MP3/M4A)
     function parseGoogleDriveAudio(url) {
       if (!url) return "";
-      const trimmed = url.trim();
+      let trimmed = url.trim();
 
-      // Hỗ trợ link Dropbox: đổi sang direct download stream
+      // Hỗ trợ link Dropbox: đổi sang direct stream có &raw=1
       if (trimmed.includes('dropbox.com')) {
-        return trimmed.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace(/[?&]dl=0/, '').replace(/[?&]raw=1/, '');
+        trimmed = trimmed
+          .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+          .replace(/[?&]dl=[01]/g, '')
+          .replace(/[?&]raw=1/g, '');
+        return trimmed.includes('?') ? `${trimmed}&raw=1` : `${trimmed}?raw=1`;
       }
 
       // Xử lý link Google Drive
@@ -381,27 +385,34 @@
 
     // Khởi tạo & nạp dữ liệu
     window.onload = async () => {
-      // Ưu tiên đọc từ bộ nhớ cục bộ nếu đã từng chỉnh sửa trên trình duyệt
+      // Ưu tiên fetch từ file podcasts.json mới nhất kèm cache-busting
+      try {
+        const res = await fetch(`podcasts.json?_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
+        });
+        if (res.ok) {
+          const fresh = await res.json();
+          if (Array.isArray(fresh) && fresh.length > 0) {
+            podcasts = fresh;
+            saveLocal();
+            renderList();
+            lucide.createIcons();
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Chưa đọc được file podcasts.json qua fetch trực tiếp, kiểm tra local storage.");
+      }
+
+      // Fallback về local storage nếu offline
       const localData = localStorage.getItem('nav_podcast_master_data');
       if (localData) {
         try {
           podcasts = JSON.parse(localData);
-          renderList();
-          lucide.createIcons();
-          return;
         } catch(e) {}
       }
 
-      // Nếu chưa có, fetch từ file podcasts.json
-      try {
-        const res = await fetch('podcasts.json');
-        if (res.ok) {
-          podcasts = await res.json();
-          saveLocal();
-        }
-      } catch (err) {
-        console.warn("Chưa đọc được file podcasts.json qua fetch trực tiếp, sử dụng dữ liệu mặc định.");
-      }
       renderList();
       lucide.createIcons();
     };
