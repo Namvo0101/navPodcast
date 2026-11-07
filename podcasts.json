@@ -1,59 +1,59 @@
 [
-  {
-    "id": "nav-1794056993273",
-    "title": "Tối ưu Clock Tree trong CTS",
-    "category": "Công nghệ",
-    "host": "Nav",
-    "date": "7/11/2026",
-    "durationFormatted": "21:55",
-    "rawDriveAudio": "https://www.dropbox.com/scl/fi/5c8j87srp9t1wx3at8c82/T-i_-u_c-y_xung_nh-p_vi_m-ch.m4a?rlkey=ysnj7rkqyfu37yuntswoujbqi&st=4eh1f1tl&dl=0",
-    "audioUrl": "https://dl.dropboxusercontent.com/scl/fi/5c8j87srp9t1wx3at8c82/T-i_-u_c-y_xung_nh-p_vi_m-ch.m4a?rlkey=ysnj7rkqyfu37yuntswoujbqi&st=4eh1f1tl",
-    "rawDriveCover": "https://drive.google.com/file/d/10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt/view?usp=drive_link",
-    "cover": "https://drive.google.com/thumbnail?id=10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt&sz=w1000",
-    "description": "Tối ưu clock tree trong CTS",
-    "timestamps": [
-      {
-        "time": 0,
-        "text": "00:00 - Bắt đầu tập"
-      }
-    ]
-  },
-  {
-    "id": "nav-1794050232626",
-    "title": "Tổng quan về Comformal Low Power",
-    "category": "Công nghệ",
-    "host": "Nav",
-    "date": "7/11/2026",
-    "durationFormatted": "17:42",
-    "rawDriveAudio": "https://www.dropbox.com/scl/fi/vuxm2m8mla8h8j2nh2dcy/X-c_minh_thi-t_k-_chip_ti-t_ki-m_-i-n.m4a?rlkey=21lokfnhykq11zu56y5xiidwn&st=8zox6xge&dl=0",
-    "audioUrl": "https://dl.dropboxusercontent.com/scl/fi/vuxm2m8mla8h8j2nh2dcy/X-c_minh_thi-t_k-_chip_ti-t_ki-m_-i-n.m4a?rlkey=21lokfnhykq11zu56y5xiidwn&st=8zox6xge",
-    "rawDriveCover": "https://drive.google.com/file/d/10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt/view?usp=drive_link",
-    "cover": "https://drive.google.com/thumbnail?id=10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt&sz=w1000",
-    "description": "Tổng quan về Comformal Low Power",
-    "timestamps": [
-      {
-        "time": 0,
-        "text": "00:00 - Bắt đầu tập"
-      }
-    ]
-  },
-  {
-    "id": "nav-1794047717138",
-    "title": "Tổng quan cơ bản về CTS",
-    "category": "Công nghệ",
-    "host": "Nav",
-    "date": "7/11/2026",
-    "durationFormatted": "16:03",
-    "rawDriveAudio": "https://www.dropbox.com/scl/fi/57l2mc525dbom8gcy0a5j/K-_thu-t_thi-t_k-_Clock_Tree_Synthesis.m4a?rlkey=fmhl3qfkfsu1xb5fvtcc5e4b7&st=47f71j97&dl=0",
-    "audioUrl": "https://dl.dropboxusercontent.com/scl/fi/57l2mc525dbom8gcy0a5j/K-_thu-t_thi-t_k-_Clock_Tree_Synthesis.m4a?rlkey=fmhl3qfkfsu1xb5fvtcc5e4b7&st=47f71j97",
-    "rawDriveCover": "https://drive.google.com/file/d/10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt/view?usp=drive_link",
-    "cover": "https://drive.google.com/thumbnail?id=10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt&sz=w1000",
-    "description": "Nội dung tổng quan về CTS",
-    "timestamps": [
-      {
-        "time": 0,
-        "text": "00:00 - Bắt đầu tập"
-      }
-    ]
-  }
+{
+"id": "nav-1794056993273",
+"title": "Tối ưu Clock Tree trong CTS",
+"category": "Công nghệ",
+"host": "Nav",
+"date": "7/11/2026",
+"durationFormatted": "21:55",
+"rawDriveAudio": "https://www.dropbox.com/scl/fi/5c8j87srp9t1wx3at8c82/T-i_-u_c-y_xung_nh-p_vi_m-ch.m4a?rlkey=ysnj7rkqyfu37yuntswoujbqi&st=4eh1f1tl&dl=0",
+"audioUrl": "https://dl.dropboxusercontent.com/scl/fi/5c8j87srp9t1wx3at8c82/T-i_-u_c-y_xung_nh-p_vi_m-ch.m4a?rlkey=ysnj7rkqyfu37yuntswoujbqi&st=4eh1f1tl&raw=1",
+"rawDriveCover": "https://drive.google.com/file/d/10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt/view?usp=drive_link",
+"cover": "https://drive.google.com/thumbnail?id=10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt&sz=w1000",
+"description": "Tối ưu clock tree trong CTS",
+"timestamps": [
+{
+"time": 0,
+"text": "00:00 - Bắt đầu tập"
+}
+]
+},
+{
+"id": "nav-1794050232626",
+"title": "Tổng quan về Comformal Low Power",
+"category": "Công nghệ",
+"host": "Nav",
+"date": "7/11/2026",
+"durationFormatted": "17:42",
+"rawDriveAudio": "https://www.dropbox.com/scl/fi/vuxm2m8mla8h8j2nh2dcy/X-c_minh_thi-t_k-chip_ti-t_ki-m-i-n.m4a?rlkey=21lokfnhykq11zu56y5xiidwn&st=8zox6xge&dl=0",
+"audioUrl": "https://dl.dropboxusercontent.com/scl/fi/vuxm2m8mla8h8j2nh2dcy/X-c_minh_thi-t_k-chip_ti-t_ki-m-i-n.m4a?rlkey=21lokfnhykq11zu56y5xiidwn&st=8zox6xge&raw=1",
+"rawDriveCover": "https://drive.google.com/file/d/10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt/view?usp=drive_link",
+"cover": "https://drive.google.com/thumbnail?id=10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt&sz=w1000",
+"description": "Tổng quan về Comformal Low Power",
+"timestamps": [
+{
+"time": 0,
+"text": "00:00 - Bắt đầu tập"
+}
+]
+},
+{
+"id": "nav-1794047717138",
+"title": "Tổng quan cơ bản về CTS",
+"category": "Công nghệ",
+"host": "Nav",
+"date": "7/11/2026",
+"durationFormatted": "16:03",
+"rawDriveAudio": "https://www.dropbox.com/scl/fi/57l2mc525dbom8gcy0a5j/K-_thu-t_thi-t_k-_Clock_Tree_Synthesis.m4a?rlkey=fmhl3qfkfsu1xb5fvtcc5e4b7&st=47f71j97&dl=0",
+"audioUrl": "https://dl.dropboxusercontent.com/scl/fi/57l2mc525dbom8gcy0a5j/K-_thu-t_thi-t_k-_Clock_Tree_Synthesis.m4a?rlkey=fmhl3qfkfsu1xb5fvtcc5e4b7&st=47f71j97&raw=1",
+"rawDriveCover": "https://drive.google.com/file/d/10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt/view?usp=drive_link",
+"cover": "https://drive.google.com/thumbnail?id=10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt&sz=w1000",
+"description": "Nội dung tổng quan về CTS",
+"timestamps": [
+{
+"time": 0,
+"text": "00:00 - Bắt đầu tập"
+}
+]
+}
 ]
