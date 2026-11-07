@@ -1,5 +1,24 @@
 [
   {
+    "id": "nav-1794056993273",
+    "title": "Tối ưu Clock Tree trong CTS",
+    "category": "Công nghệ",
+    "host": "Nav",
+    "date": "7/11/2026",
+    "durationFormatted": "21:55",
+    "rawDriveAudio": "https://www.dropbox.com/scl/fi/5c8j87srp9t1wx3at8c82/T-i_-u_c-y_xung_nh-p_vi_m-ch.m4a?rlkey=ysnj7rkqyfu37yuntswoujbqi&st=4eh1f1tl&dl=0",
+    "audioUrl": "https://dl.dropboxusercontent.com/scl/fi/5c8j87srp9t1wx3at8c82/T-i_-u_c-y_xung_nh-p_vi_m-ch.m4a?rlkey=ysnj7rkqyfu37yuntswoujbqi&st=4eh1f1tl",
+    "rawDriveCover": "https://drive.google.com/file/d/10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt/view?usp=drive_link",
+    "cover": "https://drive.google.com/thumbnail?id=10WGXbYAkPmbkE_vQX3GhIPJEnaWlelQt&sz=w1000",
+    "description": "Tối ưu clock tree trong CTS",
+    "timestamps": [
+      {
+        "time": 0,
+        "text": "00:00 - Bắt đầu tập"
+      }
+    ]
+  },
+  {
     "id": "nav-1794050232626",
     "title": "Tổng quan về Comformal Low Power",
     "category": "Công nghệ",
