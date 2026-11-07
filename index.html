@@ -881,12 +881,21 @@
       activeStreamCandidates = getDirectStreamCandidates(ep);
 
       // Nếu có chỉ định thời gian cụ thể (ví dụ bấm timestamp) thì dùng thời gian đó,
-      // ngược lại tự động kiểm tra tiến độ đã lưu trước đó của tập này
+      // ngược lại tự động kiểm tra tiến độ đã lưu trước đó của tập này.
+      // NẾU ĐÃ NGHE XONG HOẶC GẦN HẾT (>= 95% hoặc kết thúc) -> Tự động phát lại từ đầu (0s)
       if (resumeAtTime !== null) {
         initialSeekTarget = resumeAtTime;
       } else {
         const savedTime = getSavedProgressFor(ep.id);
-        initialSeekTarget = savedTime > 0 ? savedTime : null;
+        const parts = (ep.durationFormatted || '30:00').split(':');
+        const estTotalSecs = (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
+
+        if (estTotalSecs > 0 && savedTime >= estTotalSecs * 0.95) {
+          initialSeekTarget = 0; // Đã nghe xong -> Reset về 0 để nghe lại từ đầu
+          saveEpisodeProgress(ep.id, 0);
+        } else {
+          initialSeekTarget = savedTime > 0 ? savedTime : 0;
+        }
       }
 
       loadAndPlayCandidate(0);
@@ -1073,7 +1082,7 @@
         isPlaying = false;
         updatePlayStateUI();
         renderEpisodes();
-        // Đặt lại tiến độ của tập về 0 khi đã nghe xong trọn vẹn
+        // Đặt lại tiến độ của tập về 0 khi đã nghe xong trọn vẹn để lần sau bấm vào sẽ phát từ đầu
         if (currentEpisode) {
           saveEpisodeProgress(currentEpisode.id, 0);
         }
@@ -1213,14 +1222,31 @@
     }
 
     function handleSeek(val) {
-      if (audioEl.duration) {
-        audioEl.currentTime = (val / 100) * audioEl.duration;
+      if (audioEl.duration && !isNaN(audioEl.duration)) {
+        const targetSec = (val / 100) * audioEl.duration;
+        audioEl.currentTime = targetSec;
+        currentTimeText.innerText = formatTime(targetSec);
+        
+        // Cập nhật ngay tiến độ và lưu vào bộ nhớ phiên
+        if (currentEpisode) {
+          const currentSec = Math.floor(targetSec);
+          saveEpisodeProgress(currentEpisode.id, currentSec);
+          localStorage.setItem('nav_podcast_session', JSON.stringify({
+            episodeId: currentEpisode.id,
+            currentTime: currentSec
+          }));
+          renderEpisodes();
+        }
       }
     }
 
     function seekBySeconds(seconds) {
       if (!audioEl.duration) return;
       audioEl.currentTime = Math.min(Math.max(audioEl.currentTime + seconds, 0), audioEl.duration);
+      if (currentEpisode) {
+        const currentSec = Math.floor(audioEl.currentTime);
+        saveEpisodeProgress(currentEpisode.id, currentSec);
+      }
       showToast(`${seconds > 0 ? `+${seconds}s` : `${seconds}s`}`, 'rotate-cw');
     }
 
