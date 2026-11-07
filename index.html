@@ -905,6 +905,63 @@
       renderEpisodes();
     }
 
+    // Nạp và phát luồng audio dự phòng
+    function loadAndPlayCandidate(index) {
+      if (!activeStreamCandidates || activeStreamCandidates.length === 0) {
+        showToast("Không tìm thấy link audio khả dụng!", "alert-triangle");
+        return;
+      }
+
+      const candidateUrl = activeStreamCandidates[index] || activeStreamCandidates[0];
+      audioEl.src = candidateUrl;
+      audioEl.load();
+
+      const playPromise = audioEl.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            isPlaying = true;
+            updatePlayStateUI();
+          })
+          .catch(err => {
+            console.warn("Chờ tương tác người dùng hoặc lỗi nạp luồng:", err);
+            // Nếu trình duyệt chặn autoplay hoặc link đầu bị lỗi, kiểm tra luồng tiếp theo
+            if (streamCandidateIndex + 1 < activeStreamCandidates.length) {
+              streamCandidateIndex++;
+              loadAndPlayCandidate(streamCandidateIndex);
+            }
+          });
+      }
+    }
+
+    // Đảo trạng thái Play / Pause
+    function togglePlay() {
+      if (!currentEpisode) {
+        if (PODCAST_DATA.length > 0) {
+          playEpisodeById(PODCAST_DATA[0].id);
+        }
+        return;
+      }
+
+      if (audioEl.paused) {
+        const playPromise = audioEl.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              isPlaying = true;
+              updatePlayStateUI();
+            })
+            .catch(err => {
+              console.warn("Không thể phát audio:", err);
+            });
+        }
+      } else {
+        audioEl.pause();
+        isPlaying = false;
+        updatePlayStateUI();
+      }
+    }
+
     // Media Session API: Điều khiển trên màn hình khóa điện thoại (iOS / Android)
     function updateMediaSession(ep) {
       if ('mediaSession' in navigator) {
