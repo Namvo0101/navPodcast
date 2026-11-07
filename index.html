@@ -1114,6 +1114,9 @@
             if (audioCtx && audioCtx.state === 'suspended') {
               audioCtx.resume().catch(() => {});
             }
+            if ('mediaSession' in navigator) {
+              navigator.mediaSession.playbackState = 'playing';
+            }
             updatePlayStateUI();
           })
           .catch(err => {
@@ -1154,6 +1157,9 @@
               if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume().catch(() => {});
               }
+              if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'playing';
+              }
               updatePlayStateUI();
             })
             .catch(err => {
@@ -1163,6 +1169,9 @@
       } else {
         audioEl.pause();
         isPlaying = false;
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'paused';
+        }
         updatePlayStateUI();
       }
     }
@@ -1178,6 +1187,8 @@
             { src: normalizeCoverUrl(ep.cover), sizes: '512x512', type: 'image/jpeg' }
           ]
         });
+
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
 
         navigator.mediaSession.setActionHandler('play', () => togglePlay());
         navigator.mediaSession.setActionHandler('pause', () => togglePlay());
@@ -1211,6 +1222,13 @@
       // Đồng bộ trạng thái khi audio bắt đầu phát thực tế
       audioEl.onplay = () => {
         isPlaying = true;
+        // Đánh thức Web Audio API nếu bị đình chỉ khi khóa máy
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'playing';
+        }
         updatePlayStateUI();
         renderEpisodes();
       };
@@ -1218,6 +1236,9 @@
       // Đồng bộ trạng thái khi audio bị tạm dừng
       audioEl.onpause = () => {
         isPlaying = false;
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'paused';
+        }
         updatePlayStateUI();
         renderEpisodes();
       };
@@ -1255,6 +1276,17 @@
           currentTimeText.innerText = formatTime(audioEl.currentTime);
           durationTimeText.innerText = formatTime(audioEl.duration);
 
+          // Cập nhật vị trí cho MediaSession trên màn hình khóa điện thoại
+          if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+            try {
+              navigator.mediaSession.setPositionState({
+                duration: audioEl.duration,
+                playbackRate: audioEl.playbackRate || 1.0,
+                position: audioEl.currentTime
+              });
+            } catch (e) {}
+          }
+
           // Cập nhật slider trong Mobile Fullscreen nếu mở
           const fsSlider = document.getElementById('fs-seek-slider');
           if (fsSlider) fsSlider.value = progress;
@@ -1291,6 +1323,7 @@
           return;
         }
 
+        // Tự động chuyển bài ngay trong chu kỳ sự kiện (đảm bảo quyền phát nền liên tục)
         if (playbackQueue.length > 0) {
           const nextId = playbackQueue.shift();
           renderQueueList();
