@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="no-referrer">
   <title>Nav Podcast - Khám Phá Tri Thức & Cảm Hứng Mới</title>
+
+  <!-- Favicon & Apple Touch Icon cho iOS Add to Home Screen -->
+  <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w512">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w512">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nav Podcast">
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -50,7 +58,7 @@
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
 
-  <!-- Audio Element phát thanh trực tiếp (đã bỏ chặn CORS để không bị chặn kết nối) -->
+  <!-- Audio Element phát thanh trực tiếp -->
   <audio id="main-audio" preload="metadata"></audio>
 
   <!-- Thông báo Toast nổi -->
@@ -62,10 +70,15 @@
   <!-- Header Điều Hướng -->
   <header class="sticky top-0 z-40 bg-[#0f172a]/90 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-8 py-3.5 transition-all">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-      <!-- Logo -->
+      <!-- Logo Chính Thức -->
       <div class="flex items-center gap-3 cursor-pointer select-none" onclick="filterCategory('Tất cả')">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-          <i data-lucide="compass" class="w-6 h-6 text-white stroke-[2.5]"></i>
+        <div class="w-10 h-10 rounded-xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center shadow-lg shadow-indigo-500/10">
+          <img 
+            src="https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w256" 
+            alt="Nav Podcast Logo" 
+            class="w-full h-full object-contain p-1"
+            referrerpolicy="no-referrer"
+          />
         </div>
         <div>
           <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">
@@ -114,7 +127,7 @@
 
         <!-- Sleep Timer Indicator -->
         <button 
-          id="sleep-timer-btn"
+          id="sleep-timer-btn" 
           onclick="toggleSleepTimerModal()" 
           class="px-3 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 text-xs font-semibold transition active:scale-95"
           title="Hẹn giờ tắt"
@@ -235,7 +248,7 @@
       <div class="flex items-center gap-3.5 w-full md:w-1/4 min-w-0">
         <img 
           id="player-cover" 
-          src="https://placehold.co/100x100/1e293b/a5b4fc?text=Nav" 
+          src="https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w256" 
           alt="Player Track" 
           class="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-slate-700 cursor-pointer shadow-md"
           onclick="openMobileFullscreenPlayer()"
@@ -385,12 +398,12 @@
       </button>
     </div>
 
-    <!-- Vinyl Artwork Center -->
+    <!-- Artwork Center -->
     <div class="flex flex-col items-center justify-center my-auto py-6">
       <div class="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-slate-800 shadow-2xl flex items-center justify-center overflow-hidden bg-slate-900">
         <img 
           id="fs-player-cover" 
-          src="https://placehold.co/400x400/1e293b/6366f1?text=Nav" 
+          src="https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w512" 
           class="w-full h-full object-cover transition-transform duration-700" 
         />
         <div class="absolute w-14 h-14 bg-slate-950 rounded-full border-4 border-slate-800 flex items-center justify-center shadow-inner">
@@ -513,8 +526,8 @@
   <!-- Modal Hướng dẫn cài đặt cho iOS / Safari -->
   <div id="ios-pwa-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center">
-      <div class="w-14 h-14 mx-auto rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 shadow-inner">
-        <i data-lucide="smartphone" class="w-7 h-7"></i>
+      <div class="w-14 h-14 mx-auto rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center bg-white/5 shadow-inner">
+        <img src="https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w256" class="w-full h-full object-contain p-2" referrerpolicy="no-referrer" />
       </div>
       <div>
         <h3 class="text-base font-bold text-white">Cài đặt Nav Podcast vào iPhone</h3>
@@ -552,7 +565,7 @@
     let modalActiveEpisode = null;
     let streamCandidateIndex = 0;
     let activeStreamCandidates = [];
-    let initialSeekTarget = null; // Lưu vị trí giây cần khôi phục
+    let initialSeekTarget = null;
 
     // Biến quản lý PWA Install Prompt
     let deferredPWAEvent = null;
@@ -591,7 +604,7 @@
     // Hàm chuẩn hóa URL ảnh đa nguồn (Dropbox, Google Drive, Direct URL)
     function normalizeCoverUrl(url) {
       if (!url || typeof url !== 'string' || !url.trim()) {
-        return "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800&auto=format&fit=crop&q=80";
+        return "https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w1000";
       }
       let trimmed = url.trim();
 
@@ -646,16 +659,14 @@
       renderEpisodes();
       updateBookmarkUI();
       setupAudioEvents();
-      setupAutoSyncEvents(); // Lắng nghe để tự động cập nhật khi mở lại app
-      restorePlaybackSession(); // Khôi phục trạng thái phát dở
+      setupAutoSyncEvents();
+      restorePlaybackSession();
       lucide.createIcons();
     };
 
-    // Tự động kiểm tra và cập nhật khi người dùng quay lại app (chế độ PWA Standalone)
     function setupAutoSyncEvents() {
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
-          // Khi người dùng mở lại app từ màn hình khóa hoặc đa nhiệm
           loadPodcastData(true);
         }
       });
@@ -664,7 +675,6 @@
       });
     }
 
-    // Nút làm mới thủ công trên Header
     async function manualSyncPodcasts() {
       const icon = document.getElementById('refresh-btn-icon');
       if (icon) icon.classList.add('animate-spin');
@@ -674,9 +684,9 @@
       showToast("Đã đồng bộ danh sách podcast mới nhất!", "check-circle");
     }
 
-    // Khởi tạo cấu hình PWA (Manifest & Prompt cài đặt)
+    // Khởi tạo cấu hình PWA với logo chính thức
     function initPWA() {
-      // 1. Tự động tiêm Web App Manifest
+      const logoUrl = "https://drive.google.com/thumbnail?id=1hsYAzH_NBs5a-kJn93WPcfBuoRg019fF&sz=w512";
       const manifestObj = {
         name: "Nav Podcast - Audio Space",
         short_name: "Nav Podcast",
@@ -687,9 +697,9 @@
         theme_color: "#0f172a",
         icons: [
           {
-            src: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=512&auto=format&fit=crop&q=80",
+            src: logoUrl,
             sizes: "512x512",
-            type: "image/jpeg",
+            type: "image/png",
             purpose: "any maskable"
           }
         ]
@@ -701,7 +711,6 @@
       manifestLink.href = manifestUrl;
       document.head.appendChild(manifestLink);
 
-      // 2. Bắt sự kiện cài đặt của trình duyệt (Chrome, Edge, Cốc Cốc, Android)
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPWAEvent = e;
@@ -711,7 +720,6 @@
         }
       });
 
-      // 3. Nếu đang trên iOS Safari, hiển thị nút để mở hướng dẫn Add to Home Screen
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
       if (isIOS && !isStandalone) {
@@ -730,14 +738,12 @@
     }
 
     function triggerPWAInstall() {
-      // Nếu là iOS Safari
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       if (isIOS) {
         toggleIOSPWAModal();
         return;
       }
 
-      // Nếu trình duyệt hỗ trợ beforeinstallprompt trực tiếp
       if (deferredPWAEvent) {
         deferredPWAEvent.prompt();
         deferredPWAEvent.userChoice.then((choiceResult) => {
@@ -759,7 +765,6 @@
       lucide.createIcons();
     }
 
-    // Khôi phục phiên nghe gần nhất từ localStorage
     function restorePlaybackSession() {
       try {
         const savedSession = localStorage.getItem('nav_podcast_session');
@@ -771,12 +776,10 @@
         if (!ep) return;
 
         currentEpisode = ep;
-        // Lấy tiến độ đã lưu riêng của tập này
         initialSeekTarget = getSavedProgressFor(ep.id) || session.currentTime || 0;
         activeStreamCandidates = getDirectStreamCandidates(ep);
         streamCandidateIndex = 0;
 
-        // Thiết lập giao diện player với thông tin tập dở dang
         playerTitle.innerText = ep.title;
         playerHost.innerText = ep.host;
         playerCover.src = normalizeCoverUrl(ep.cover);
@@ -790,11 +793,9 @@
       }
     }
 
-    // Nạp dữ liệu: Luôn ưu tiên fetch file podcasts.json mới nhất kèm tham số chống cache (Cache-Busting)
     async function loadPodcastData(silent = false) {
       let isDataUpdated = false;
       try {
-        // Gắn timestamp ?_t=... và { cache: 'no-store' } để vượt qua browser cache khi add to home screen
         const res = await fetch(`podcasts.json?_t=${Date.now()}`, {
           cache: 'no-store',
           headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
@@ -803,7 +804,6 @@
         if (res.ok) {
           const freshData = await res.json();
           if (Array.isArray(freshData) && freshData.length > 0) {
-            // Kiểm tra xem số lượng tập hoặc ID tập đầu có thay đổi không
             if (JSON.stringify(freshData) !== JSON.stringify(PODCAST_DATA)) {
               PODCAST_DATA = freshData;
               localStorage.setItem('nav_podcast_master_data', JSON.stringify(freshData));
@@ -818,7 +818,6 @@
         console.warn("Không thể fetch trực tuyến podcasts.json, kiểm tra dữ liệu offline:", err);
       }
 
-      // Nếu không fetch được từ mạng (ví dụ mất mạng), fallback về localStorage
       if (PODCAST_DATA.length === 0) {
         const localData = localStorage.getItem('nav_podcast_master_data');
         if (localData) {
@@ -918,13 +917,11 @@
         const isCurrent = currentEpisode && currentEpisode.id === item.id;
         const isBookmarked = bookmarks.includes(item.id);
         
-        // Tính toán thanh tiến trình nghe trên thẻ tập
         const savedSecs = progressMap[item.id] || 0;
         let progressPct = 0;
         let isFinished = false;
 
         if (savedSecs > 0) {
-          // Ước lượng độ dài từ chuỗi mm:ss
           const parts = (item.durationFormatted || '30:00').split(':');
           const totalSecs = (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
           if (totalSecs > 0) {
@@ -950,7 +947,6 @@
                   ${item.category}
                 </span>
 
-                <!-- Vạch tiến trình nghe ngay trên ảnh bìa của từng tập -->
                 ${progressPct > 0 ? `
                   <div class="absolute bottom-0 inset-x-0 h-1.5 bg-slate-800/80">
                     <div class="h-full ${isFinished ? 'bg-emerald-500' : 'bg-brand-500'}" style="width: ${progressPct}%"></div>
@@ -1013,12 +1009,9 @@
       lucide.createIcons();
     }
 
-    // Audio Playback
-    // Tạo danh sách URL streaming dự phòng không bao giờ popup iframe
     function getDirectStreamCandidates(ep) {
       const raw = (ep.audioUrl || ep.rawDriveAudio || '').trim();
       
-      // Xử lý link Dropbox: Đảm bảo đổi www -> dl.dropboxusercontent.com và luôn gắn raw=1
       if (raw.includes('dropbox.com')) {
         let dbxDirect = raw.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
         try {
@@ -1035,11 +1028,10 @@
 
       const driveMatch = raw.match(/\/d\/([a-zA-Z0-9_-]+)/) || raw.match(/id=([a-zA-Z0-9_-]+)/);
       if (!driveMatch || !driveMatch[1]) {
-        return [raw]; // Không phải link drive (URL trực tiếp hoặc link local)
+        return [raw];
       }
       
       const fileId = driveMatch[1];
-      // Danh sách các luồng Direct Stream tương thích
       return [
         `https://drive.usercontent.google.com/download?id=${fileId}&export=download&authuser=0`,
         `https://drive.google.com/uc?export=download&id=${fileId}`
@@ -1050,12 +1042,10 @@
       const ep = PODCAST_DATA.find(e => e.id === id);
       if (!ep) return;
 
-      // Lưu lại tiến độ của tập hiện tại trước khi chuyển sang tập mới
       if (currentEpisode && audioEl.currentTime > 0) {
         saveEpisodeProgress(currentEpisode.id, audioEl.currentTime);
       }
 
-      // Nếu đang mở chính tập này và audio đã có src sẵn sàng thì chỉ việc toggle play/pause
       if (currentEpisode && currentEpisode.id === ep.id && resumeAtTime === null && audioEl.src && audioEl.src !== window.location.href) {
         togglePlay();
         return;
@@ -1065,9 +1055,6 @@
       streamCandidateIndex = 0;
       activeStreamCandidates = getDirectStreamCandidates(ep);
 
-      // Nếu có chỉ định thời gian cụ thể (ví dụ bấm timestamp) thì dùng thời gian đó,
-      // ngược lại tự động kiểm tra tiến độ đã lưu trước đó của tập này.
-      // NẾU ĐÃ NGHE XONG HOẶC GẦN HẾT (>= 95% hoặc kết thúc) -> Tự động phát lại từ đầu (0s)
       if (resumeAtTime !== null) {
         initialSeekTarget = resumeAtTime;
       } else {
@@ -1076,7 +1063,7 @@
         const estTotalSecs = (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
 
         if (estTotalSecs > 0 && savedTime >= estTotalSecs * 0.95) {
-          initialSeekTarget = 0; // Đã nghe xong -> Reset về 0 để nghe lại từ đầu
+          initialSeekTarget = 0;
           saveEpisodeProgress(ep.id, 0);
         } else {
           initialSeekTarget = savedTime > 0 ? savedTime : 0;
@@ -1090,16 +1077,12 @@
       playerCover.src = normalizeCoverUrl(ep.cover);
       durationTimeText.innerText = ep.durationFormatted || "--:--";
 
-      // Cập nhật màn hình toàn màn hình nếu đang mở
       updateFullscreenUI();
-      // Thiết lập Media Session API cho màn hình khóa
       updateMediaSession(ep);
-
       updatePlayerBookmarkIcon();
       renderEpisodes();
     }
 
-    // Nạp và phát luồng audio dự phòng
     function loadAndPlayCandidate(index) {
       if (!activeStreamCandidates || activeStreamCandidates.length === 0) {
         showToast("Không tìm thấy link audio khả dụng!", "alert-triangle");
@@ -1108,13 +1091,10 @@
 
       const candidateUrl = activeStreamCandidates[index] || activeStreamCandidates[0];
       
-      // Quan trọng khi chạy nền: không reset toàn bộ thẻ audio nếu cùng chung format,
-      // chỉ gán src trực tiếp để giữ quyền audio session từ OS
       if (audioEl.src !== candidateUrl) {
         audioEl.src = candidateUrl;
       }
 
-      // Kích hoạt phát và xử lý việc đánh thức âm thanh
       const playPromise = audioEl.play();
       if (playPromise !== undefined) {
         playPromise
@@ -1138,7 +1118,6 @@
       }
     }
 
-    // Đảo trạng thái Play / Pause
     function togglePlay() {
       if (!currentEpisode) {
         if (PODCAST_DATA.length > 0) {
@@ -1147,7 +1126,6 @@
         return;
       }
 
-      // Nếu thẻ audio chưa được nạp URL thực tế (ví dụ vừa F5 khôi phục session)
       if (!audioEl.src || audioEl.src === window.location.href || audioEl.src === '') {
         if (!activeStreamCandidates || activeStreamCandidates.length === 0) {
           activeStreamCandidates = getDirectStreamCandidates(currentEpisode);
@@ -1185,7 +1163,6 @@
       }
     }
 
-    // Media Session API: Điều khiển trên màn hình khóa điện thoại (iOS / Android)
     function updateMediaSession(ep) {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -1197,10 +1174,8 @@
           ]
         });
 
-        // Chỉ định rõ ràng nguồn phát của App để OS không tự trích xuất URL lạ từ ID3 tags của MP3
         if ('actionHandlers' in navigator.mediaSession || 'setPositionState' in navigator.mediaSession) {
           try {
-            // Định hướng hành động quay về trang web hiện tại khi chạm vào trình phát trên màn hình khóa
             navigator.mediaSession.setActionHandler('seekto', (details) => {
               if (details.seekTime && audioEl.duration) {
                 audioEl.currentTime = details.seekTime;
@@ -1240,10 +1215,8 @@
     function setupAudioEvents() {
       audioEl.onloadstart = () => showToast("Đang kết nối luồng audio...", "loader");
       
-      // Đồng bộ trạng thái khi audio bắt đầu phát thực tế
       audioEl.onplay = () => {
         isPlaying = true;
-        // Đánh thức Web Audio API nếu bị đình chỉ khi khóa máy
         if (audioCtx && audioCtx.state === 'suspended') {
           audioCtx.resume().catch(() => {});
         }
@@ -1254,7 +1227,6 @@
         renderEpisodes();
       };
 
-      // Đồng bộ trạng thái khi audio bị tạm dừng
       audioEl.onpause = () => {
         isPlaying = false;
         if ('mediaSession' in navigator) {
@@ -1267,7 +1239,6 @@
       audioEl.oncanplay = () => {
         if (!isNaN(audioEl.duration) && audioEl.duration > 0) {
           durationTimeText.innerText = formatTime(audioEl.duration);
-          // Tua đến thời điểm đã lưu của tập này
           if (initialSeekTarget !== null && initialSeekTarget < audioEl.duration) {
             audioEl.currentTime = initialSeekTarget;
             seekSlider.value = (initialSeekTarget / audioEl.duration) * 100;
@@ -1277,7 +1248,6 @@
         }
       };
       
-      // Khi gặp lỗi luồng audio, tự động đổi phương thức hoặc thông báo rõ giải pháp
       audioEl.onerror = (e) => {
         console.error("Lỗi tải audio:", e);
         if (activeStreamCandidates && streamCandidateIndex + 1 < activeStreamCandidates.length) {
@@ -1290,6 +1260,7 @@
           showToast("Link file bị chặn quyền truy cập. Bạn hãy thử dùng link Dropbox hoặc MP3 trực tiếp!", "alert-triangle");
         }
       };
+
       audioEl.ontimeupdate = () => {
         if (!isNaN(audioEl.duration) && audioEl.duration > 0) {
           const progress = (audioEl.currentTime / audioEl.duration) * 100;
@@ -1297,7 +1268,6 @@
           currentTimeText.innerText = formatTime(audioEl.currentTime);
           durationTimeText.innerText = formatTime(audioEl.duration);
 
-          // Cập nhật vị trí cho MediaSession trên màn hình khóa điện thoại
           if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
             try {
               navigator.mediaSession.setPositionState({
@@ -1308,7 +1278,6 @@
             } catch (e) {}
           }
 
-          // Cập nhật slider trong Mobile Fullscreen nếu mở
           const fsSlider = document.getElementById('fs-seek-slider');
           if (fsSlider) fsSlider.value = progress;
           const fsCurrent = document.getElementById('fs-current-time');
@@ -1316,7 +1285,6 @@
           const fsDuration = document.getElementById('fs-duration-time');
           if (fsDuration) fsDuration.innerText = formatTime(audioEl.duration);
 
-          // Tự động ghi nhớ vị trí phát cho riêng tập này và phiên chung
           if (currentEpisode) {
             const currentSec = Math.floor(audioEl.currentTime);
             saveEpisodeProgress(currentEpisode.id, currentSec);
@@ -1327,24 +1295,22 @@
           }
         }
       };
+
       audioEl.onended = () => {
         isPlaying = false;
         updatePlayStateUI();
         renderEpisodes();
-        // Đặt lại tiến độ của tập về 0 khi đã nghe xong trọn vẹn để lần sau bấm vào sẽ phát từ đầu
         if (currentEpisode) {
           saveEpisodeProgress(currentEpisode.id, 0);
         }
         localStorage.removeItem('nav_podcast_session');
 
-        // Nếu có hẹn giờ tắt khi hết tập
         if (sleepOnEpisodeEnd) {
           cancelSleepTimer();
           showToast("Đã dừng phát theo hẹn giờ khi hết tập!", "moon");
           return;
         }
 
-        // Tự động chuyển bài ngay trong chu kỳ sự kiện (đảm bảo quyền phát nền liên tục)
         if (playbackQueue.length > 0) {
           const nextId = playbackQueue.shift();
           renderQueueList();
@@ -1355,7 +1321,6 @@
       };
     }
 
-    // Voice Boost (Web Audio API Equalizer)
     function toggleVoiceBoost() {
       if (!audioCtx) {
         try {
@@ -1363,12 +1328,11 @@
           audioCtx = new AudioContext();
           sourceNode = audioCtx.createMediaElementSource(audioEl);
           
-          // Tạo bộ lọc dải tần số giọng nói (Peaking Filter ~1500Hz)
           voiceBoostFilter = audioCtx.createBiquadFilter();
           voiceBoostFilter.type = "peaking";
-          voiceBoostFilter.frequency.value = 1800; // Tập trung vào dải giọng người
+          voiceBoostFilter.frequency.value = 1800;
           voiceBoostFilter.Q.value = 1.2;
-          voiceBoostFilter.gain.value = 7.0; // Tăng âm lượng dải thoại
+          voiceBoostFilter.gain.value = 7.0;
 
           sourceNode.connect(voiceBoostFilter);
           voiceBoostFilter.connect(audioCtx.destination);
@@ -1393,7 +1357,6 @@
       showToast(isVoiceBoostEnabled ? "Đã bật Lọc rõ giọng nói" : "Đã tắt Lọc rõ giọng nói", "activity");
     }
 
-    // Sleep Timer Logic
     function toggleSleepTimerModal() {
       const modal = document.getElementById('sleep-timer-modal');
       modal.classList.toggle('hidden');
@@ -1447,7 +1410,6 @@
       document.getElementById('sleep-timer-badge').classList.add('hidden');
     }
 
-    // Mobile Fullscreen Player View
     function openMobileFullscreenPlayer() {
       if (!currentEpisode) return;
       updateFullscreenUI();
@@ -1477,7 +1439,6 @@
         audioEl.currentTime = targetSec;
         currentTimeText.innerText = formatTime(targetSec);
         
-        // Cập nhật ngay tiến độ và lưu vào bộ nhớ phiên
         if (currentEpisode) {
           const currentSec = Math.floor(targetSec);
           saveEpisodeProgress(currentEpisode.id, currentSec);
@@ -1547,7 +1508,6 @@
       playEpisodeById(PODCAST_DATA[prevIndex].id);
     }
 
-    // Bookmarks
     function toggleBookmark(id) {
       const idx = bookmarks.indexOf(id);
       if (idx > -1) {
@@ -1579,7 +1539,6 @@
       lucide.createIcons();
     }
 
-    // Queue
     function addToQueue(id) {
       if (!playbackQueue.includes(id)) {
         playbackQueue.push(id);
@@ -1637,7 +1596,6 @@
       showToast('Đã xóa hàng đợi', 'trash');
     }
 
-    // Modal Timestamps
     function openDetailModal(id) {
       const item = PODCAST_DATA.find(e => e.id === id);
       if (!item) return;
