@@ -39,6 +39,13 @@
       overflow: hidden;
     }
     input[type=range] { accent-color: #6366f1; }
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spin-slow 20s linear infinite;
+    }
   </style>
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
@@ -84,6 +91,17 @@
 
       <!-- Tiện ích bên phải -->
       <div class="flex items-center gap-2.5">
+        <!-- Sleep Timer Indicator -->
+        <button 
+          id="sleep-timer-btn"
+          onclick="toggleSleepTimerModal()" 
+          class="px-3 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 text-xs font-semibold transition active:scale-95"
+          title="Hẹn giờ tắt"
+        >
+          <i data-lucide="moon" class="w-4 h-4 text-indigo-400"></i>
+          <span id="sleep-timer-badge" class="hidden font-mono text-[11px] text-amber-300">--:--</span>
+        </button>
+
         <button 
           id="fav-filter-btn"
           onclick="toggleBookmarkView()" 
@@ -199,10 +217,10 @@
           src="https://placehold.co/100x100/1e293b/a5b4fc?text=Nav" 
           alt="Player Track" 
           class="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-slate-700 cursor-pointer shadow-md"
-          onclick="openActiveModal()"
+          onclick="openMobileFullscreenPlayer()"
         />
         <div class="min-w-0 flex-1">
-          <h4 id="player-title" class="text-sm font-semibold text-white truncate cursor-pointer hover:underline" onclick="openActiveModal()">
+          <h4 id="player-title" class="text-sm font-semibold text-white truncate cursor-pointer hover:underline" onclick="openMobileFullscreenPlayer()">
             Chọn một tập để bắt đầu nghe
           </h4>
           <p id="player-host" class="text-xs text-slate-400 truncate">
@@ -260,6 +278,17 @@
 
       <!-- Điều khiển phụ -->
       <div class="flex items-center justify-end gap-3 w-full md:w-1/4">
+        <!-- Voice Boost Button -->
+        <button 
+          id="voice-boost-btn" 
+          onclick="toggleVoiceBoost()"
+          class="px-2 py-1 text-xs font-semibold rounded-md bg-slate-800 text-slate-400 hover:text-indigo-300 border border-slate-700 transition flex items-center gap-1"
+          title="Lọc rõ giọng nói (Voice Boost)"
+        >
+          <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+          <span class="hidden lg:inline text-[10px]">Lọc giọng</span>
+        </button>
+
         <button 
           id="speed-btn" 
           onclick="cyclePlaybackSpeed()"
@@ -287,10 +316,116 @@
         <button onclick="toggleQueueDrawer()" class="p-1.5 text-slate-400 hover:text-indigo-400 transition" title="Hàng đợi">
           <i data-lucide="list-video" class="w-5 h-5"></i>
         </button>
+
+        <!-- Nút mở full màn hình trên Mobile -->
+        <button onclick="openMobileFullscreenPlayer()" class="p-1.5 text-slate-400 hover:text-white md:hidden" title="Toàn màn hình">
+          <i data-lucide="maximize-2" class="w-4 h-4"></i>
+        </button>
       </div>
 
     </div>
   </aside>
+
+  <!-- Modal Hẹn Giờ Ngủ (Sleep Timer) -->
+  <div id="sleep-timer-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="moon" class="w-4 h-4 text-indigo-400"></i>
+          Hẹn giờ tắt (Sleep Timer)
+        </h3>
+        <button onclick="toggleSleepTimerModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-400">Âm thanh sẽ tự động dừng khi hết thời gian đã chọn.</p>
+      <div class="grid grid-cols-2 gap-2 text-xs font-semibold">
+        <button onclick="setSleepTimer(15)" class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600 hover:text-white border border-slate-700 text-slate-200 transition">15 phút</button>
+        <button onclick="setSleepTimer(30)" class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600 hover:text-white border border-slate-700 text-slate-200 transition">30 phút</button>
+        <button onclick="setSleepTimer(45)" class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600 hover:text-white border border-slate-700 text-slate-200 transition">45 phút</button>
+        <button onclick="setSleepTimer(60)" class="py-2.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600 hover:text-white border border-slate-700 text-slate-200 transition">60 phút</button>
+        <button onclick="setSleepTimer('end')" class="col-span-2 py-2.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600 hover:text-white border border-slate-700 text-slate-200 transition">Khi hết tập hiện tại</button>
+      </div>
+      <div class="pt-2">
+        <button onclick="cancelSleepTimer()" class="w-full py-2 bg-slate-800 hover:bg-rose-900/40 text-rose-400 border border-slate-700 rounded-xl text-xs font-semibold transition">Hủy hẹn giờ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Fullscreen Player View -->
+  <div id="mobile-fullscreen-modal" class="fixed inset-0 z-50 bg-[#0b0f19] hidden flex-col justify-between p-6 overflow-y-auto">
+    <div class="flex items-center justify-between pb-4">
+      <button onclick="closeMobileFullscreenPlayer()" class="p-2 text-slate-400 hover:text-white">
+        <i data-lucide="chevron-down" class="w-6 h-6"></i>
+      </button>
+      <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Đang phát</span>
+      <button onclick="openActiveModal(); closeMobileFullscreenPlayer();" class="p-2 text-slate-400 hover:text-white">
+        <i data-lucide="info" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Vinyl Artwork Center -->
+    <div class="flex flex-col items-center justify-center my-auto py-6">
+      <div class="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-slate-800 shadow-2xl flex items-center justify-center overflow-hidden bg-slate-900">
+        <img 
+          id="fs-player-cover" 
+          src="https://placehold.co/400x400/1e293b/6366f1?text=Nav" 
+          class="w-full h-full object-cover transition-transform duration-700" 
+        />
+        <div class="absolute w-14 h-14 bg-slate-950 rounded-full border-4 border-slate-800 flex items-center justify-center shadow-inner">
+          <div class="w-4 h-4 bg-brand-500 rounded-full"></div>
+        </div>
+      </div>
+      
+      <div class="mt-8 text-center px-4 max-w-sm">
+        <h2 id="fs-player-title" class="text-lg font-bold text-white line-clamp-2">Chọn một tập</h2>
+        <p id="fs-player-host" class="text-sm text-slate-400 mt-1">Nav Podcast Studio</p>
+      </div>
+    </div>
+
+    <!-- Controls Bottom -->
+    <div class="space-y-6 max-w-md mx-auto w-full pb-8">
+      <!-- Scrubbing -->
+      <div class="space-y-1">
+        <input 
+          type="range" 
+          id="fs-seek-slider" 
+          min="0" 
+          max="100" 
+          value="0" 
+          class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+          oninput="handleSeek(this.value)"
+        />
+        <div class="flex justify-between text-xs text-slate-400 font-mono">
+          <span id="fs-current-time">0:00</span>
+          <span id="fs-duration-time">0:00</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between px-2">
+        <button onclick="seekBySeconds(-15)" class="text-slate-400 hover:text-white p-2">
+          <i data-lucide="rotate-ccw" class="w-6 h-6"></i>
+        </button>
+        <button onclick="playPrevEpisode()" class="text-slate-300 hover:text-white p-2">
+          <i data-lucide="skip-back" class="w-7 h-7"></i>
+        </button>
+        <button 
+          id="fs-play-btn"
+          onclick="togglePlay()" 
+          class="w-16 h-16 rounded-full bg-brand-500 text-white flex items-center justify-center shadow-xl shadow-brand-500/40 active:scale-90 transition"
+        >
+          <i id="fs-play-btn-icon" data-lucide="play" class="w-7 h-7 fill-white translate-x-0.5"></i>
+        </button>
+        <button onclick="playNextEpisode()" class="text-slate-300 hover:text-white p-2">
+          <i data-lucide="skip-forward" class="w-7 h-7"></i>
+        </button>
+        <button onclick="seekBySeconds(30)" class="text-slate-400 hover:text-white p-2">
+          <i data-lucide="rotate-cw" class="w-6 h-6"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal Chi Tiết Tập -->
   <div id="detail-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
@@ -369,6 +504,15 @@
     let streamCandidateIndex = 0;
     let activeStreamCandidates = [];
     let initialSeekTarget = null; // Lưu vị trí giây cần khôi phục
+
+    // Sleep Timer & Voice Boost variables
+    let sleepTimerId = null;
+    let sleepTimerTargetTime = null;
+    let sleepOnEpisodeEnd = false;
+    let audioCtx = null;
+    let sourceNode = null;
+    let voiceBoostFilter = null;
+    let isVoiceBoostEnabled = false;
 
     // Quản lý tiến độ nghe của từng tập riêng biệt
     function getEpisodeProgressMap() {
@@ -593,9 +737,26 @@
 
       emptyState.classList.add('hidden');
 
+      const progressMap = getEpisodeProgressMap();
+
       episodesGrid.innerHTML = filtered.map(item => {
         const isCurrent = currentEpisode && currentEpisode.id === item.id;
         const isBookmarked = bookmarks.includes(item.id);
+        
+        // Tính toán thanh tiến trình nghe trên thẻ tập
+        const savedSecs = progressMap[item.id] || 0;
+        let progressPct = 0;
+        let isFinished = false;
+
+        if (savedSecs > 0) {
+          // Ước lượng độ dài từ chuỗi mm:ss
+          const parts = (item.durationFormatted || '30:00').split(':');
+          const totalSecs = (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
+          if (totalSecs > 0) {
+            progressPct = Math.min(Math.round((savedSecs / totalSecs) * 100), 100);
+            if (progressPct >= 95) isFinished = true;
+          }
+        }
 
         return `
           <div class="group bg-slate-900/60 hover:bg-slate-800/80 border ${isCurrent ? 'border-brand-500 ring-1 ring-brand-500/40' : 'border-slate-800 hover:border-slate-700'} rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between hover:shadow-xl hover:-translate-y-1">
@@ -613,6 +774,25 @@
                 <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-slate-900/85 backdrop-blur border border-slate-700/60 text-[10px] font-semibold text-brand-300">
                   ${item.category}
                 </span>
+
+                <!-- Vạch tiến trình nghe ngay trên ảnh bìa của từng tập -->
+                ${progressPct > 0 ? `
+                  <div class="absolute bottom-0 inset-x-0 h-1.5 bg-slate-800/80">
+                    <div class="h-full ${isFinished ? 'bg-emerald-500' : 'bg-brand-500'}" style="width: ${progressPct}%"></div>
+                  </div>
+                ` : ''}
+              </div>
+
+              <div class="flex items-center gap-2 mb-1">
+                ${isFinished ? `
+                  <span class="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                    <i data-lucide="check-check" class="w-3 h-3"></i> Đã nghe xong
+                  </span>
+                ` : (progressPct > 0 ? `
+                  <span class="text-[10px] font-medium text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-md">
+                    Đã nghe ${progressPct}%
+                  </span>
+                ` : '')}
               </div>
 
               <h3 class="font-bold text-slate-100 text-base leading-snug hover:text-indigo-400 transition cursor-pointer line-clamp-2" onclick="openDetailModal('${item.id}')">
@@ -716,66 +896,49 @@
       playerCover.src = normalizeCoverUrl(ep.cover);
       durationTimeText.innerText = ep.durationFormatted || "--:--";
 
+      // Cập nhật màn hình toàn màn hình nếu đang mở
+      updateFullscreenUI();
+      // Thiết lập Media Session API cho màn hình khóa
+      updateMediaSession(ep);
+
       updatePlayerBookmarkIcon();
       renderEpisodes();
     }
 
-    function loadAndPlayCandidate(index) {
-      if (!activeStreamCandidates || index >= activeStreamCandidates.length) {
-        isPlaying = false;
-        updatePlayStateUI();
-        showToast("Không thể nạp file. Hãy đảm bảo file Drive đã bật 'Bất kỳ ai có liên kết'!", "alert-triangle");
-        return;
-      }
-
-      const streamUrl = activeStreamCandidates[index];
-      audioEl.src = streamUrl;
-      audioEl.playbackRate = playbackSpeeds[currentSpeedIdx];
-      audioEl.load();
-
-      const playPromise = audioEl.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          isPlaying = true;
-          updatePlayStateUI();
-          showToast(`Đang phát: ${currentEpisode.title}`, 'play');
-        }).catch((err) => {
-          console.warn(`Luồng ${index + 1} cần tương tác hoặc thử luồng tiếp:`, err);
+    // Media Session API: Điều khiển trên màn hình khóa điện thoại (iOS / Android)
+    function updateMediaSession(ep) {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: ep.title,
+          artist: ep.host,
+          album: 'Nav Podcast',
+          artwork: [
+            { src: normalizeCoverUrl(ep.cover), sizes: '512x512', type: 'image/jpeg' }
+          ]
         });
-      }
-    }
 
-    function togglePlay() {
-      if (!currentEpisode) {
-        playFeatured();
-        return;
+        navigator.mediaSession.setActionHandler('play', () => togglePlay());
+        navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+        navigator.mediaSession.setActionHandler('seekbackward', () => seekBySeconds(-15));
+        navigator.mediaSession.setActionHandler('seekforward', () => seekBySeconds(30));
+        navigator.mediaSession.setActionHandler('previoustrack', () => playPrevEpisode());
+        navigator.mediaSession.setActionHandler('nexttrack', () => playNextEpisode());
       }
-
-      if (audioEl.paused) {
-        audioEl.play().then(() => {
-          isPlaying = true;
-          updatePlayStateUI();
-        }).catch(() => {
-          // Thử sang endpoint tiếp theo nếu đang bị chặn
-          if (streamCandidateIndex + 1 < activeStreamCandidates.length) {
-            streamCandidateIndex++;
-            loadAndPlayCandidate(streamCandidateIndex);
-          }
-        });
-      } else {
-        audioEl.pause();
-        isPlaying = false;
-        updatePlayStateUI();
-      }
-      renderEpisodes();
     }
 
     function updatePlayStateUI() {
       const playBtn = document.getElementById('play-toggle-btn');
+      const fsPlayBtn = document.getElementById('fs-play-btn');
+      const fsCover = document.getElementById('fs-player-cover');
+
       if (isPlaying) {
         playBtn.innerHTML = '<i id="play-btn-icon" data-lucide="pause" class="w-5 h-5 fill-white"></i>';
+        if (fsPlayBtn) fsPlayBtn.innerHTML = '<i id="fs-play-btn-icon" data-lucide="pause" class="w-7 h-7 fill-white"></i>';
+        if (fsCover) fsCover.classList.add('animate-spin-slow');
       } else {
         playBtn.innerHTML = '<i id="play-btn-icon" data-lucide="play" class="w-5 h-5 fill-white translate-x-0.5"></i>';
+        if (fsPlayBtn) fsPlayBtn.innerHTML = '<i id="fs-play-btn-icon" data-lucide="play" class="w-7 h-7 fill-white translate-x-0.5"></i>';
+        if (fsCover) fsCover.classList.remove('animate-spin-slow');
       }
       lucide.createIcons();
     }
@@ -825,9 +988,18 @@
       };
       audioEl.ontimeupdate = () => {
         if (!isNaN(audioEl.duration) && audioEl.duration > 0) {
-          seekSlider.value = (audioEl.currentTime / audioEl.duration) * 100;
+          const progress = (audioEl.currentTime / audioEl.duration) * 100;
+          seekSlider.value = progress;
           currentTimeText.innerText = formatTime(audioEl.currentTime);
           durationTimeText.innerText = formatTime(audioEl.duration);
+
+          // Cập nhật slider trong Mobile Fullscreen nếu mở
+          const fsSlider = document.getElementById('fs-seek-slider');
+          if (fsSlider) fsSlider.value = progress;
+          const fsCurrent = document.getElementById('fs-current-time');
+          if (fsCurrent) fsCurrent.innerText = formatTime(audioEl.currentTime);
+          const fsDuration = document.getElementById('fs-duration-time');
+          if (fsDuration) fsDuration.innerText = formatTime(audioEl.duration);
 
           // Tự động ghi nhớ vị trí phát cho riêng tập này và phiên chung
           if (currentEpisode) {
@@ -849,6 +1021,14 @@
           saveEpisodeProgress(currentEpisode.id, 0);
         }
         localStorage.removeItem('nav_podcast_session');
+
+        // Nếu có hẹn giờ tắt khi hết tập
+        if (sleepOnEpisodeEnd) {
+          cancelSleepTimer();
+          showToast("Đã dừng phát theo hẹn giờ khi hết tập!", "moon");
+          return;
+        }
+
         if (playbackQueue.length > 0) {
           const nextId = playbackQueue.shift();
           renderQueueList();
@@ -857,6 +1037,122 @@
           playNextEpisode();
         }
       };
+    }
+
+    // Voice Boost (Web Audio API Equalizer)
+    function toggleVoiceBoost() {
+      if (!audioCtx) {
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContext();
+          sourceNode = audioCtx.createMediaElementSource(audioEl);
+          
+          // Tạo bộ lọc dải tần số giọng nói (Peaking Filter ~1500Hz)
+          voiceBoostFilter = audioCtx.createBiquadFilter();
+          voiceBoostFilter.type = "peaking";
+          voiceBoostFilter.frequency.value = 1800; // Tập trung vào dải giọng người
+          voiceBoostFilter.Q.value = 1.2;
+          voiceBoostFilter.gain.value = 7.0; // Tăng âm lượng dải thoại
+
+          sourceNode.connect(voiceBoostFilter);
+          voiceBoostFilter.connect(audioCtx.destination);
+          isVoiceBoostEnabled = true;
+        } catch(e) {
+          console.warn("Trình duyệt hạn chế Web Audio API:", e);
+        }
+      } else {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        isVoiceBoostEnabled = !isVoiceBoostEnabled;
+        if (voiceBoostFilter) {
+          voiceBoostFilter.gain.value = isVoiceBoostEnabled ? 7.0 : 0.0;
+        }
+      }
+
+      const btn = document.getElementById('voice-boost-btn');
+      btn.classList.toggle('text-indigo-400', isVoiceBoostEnabled);
+      btn.classList.toggle('bg-indigo-500/20', isVoiceBoostEnabled);
+      btn.classList.toggle('border-indigo-500/40', isVoiceBoostEnabled);
+      showToast(isVoiceBoostEnabled ? "Đã bật Lọc rõ giọng nói" : "Đã tắt Lọc rõ giọng nói", "activity");
+    }
+
+    // Sleep Timer Logic
+    function toggleSleepTimerModal() {
+      const modal = document.getElementById('sleep-timer-modal');
+      modal.classList.toggle('hidden');
+      modal.classList.toggle('flex');
+    }
+
+    function setSleepTimer(minutes) {
+      cancelSleepTimer();
+      toggleSleepTimerModal();
+
+      if (minutes === 'end') {
+        sleepOnEpisodeEnd = true;
+        document.getElementById('sleep-timer-badge').innerText = "Hết tập";
+        document.getElementById('sleep-timer-badge').classList.remove('hidden');
+        showToast("Sẽ dừng phát khi nghe xong tập hiện tại", "moon");
+        return;
+      }
+
+      const durationMs = minutes * 60 * 1000;
+      sleepTimerTargetTime = Date.now() + durationMs;
+      document.getElementById('sleep-timer-badge').classList.remove('hidden');
+
+      updateSleepBadgeCountdown();
+      sleepTimerId = setInterval(() => {
+        const remainingSecs = Math.max(0, Math.floor((sleepTimerTargetTime - Date.now()) / 1000));
+        if (remainingSecs <= 0) {
+          audioEl.pause();
+          isPlaying = false;
+          updatePlayStateUI();
+          cancelSleepTimer();
+          showToast("Đã dừng phát theo hẹn giờ ngủ!", "moon");
+        } else {
+          updateSleepBadgeCountdown();
+        }
+      }, 1000);
+
+      showToast(`Hẹn giờ tắt sau ${minutes} phút`, "moon");
+    }
+
+    function updateSleepBadgeCountdown() {
+      if (!sleepTimerTargetTime) return;
+      const rem = Math.max(0, Math.floor((sleepTimerTargetTime - Date.now()) / 1000));
+      document.getElementById('sleep-timer-badge').innerText = formatTime(rem);
+    }
+
+    function cancelSleepTimer() {
+      if (sleepTimerId) clearInterval(sleepTimerId);
+      sleepTimerId = null;
+      sleepTimerTargetTime = null;
+      sleepOnEpisodeEnd = false;
+      document.getElementById('sleep-timer-badge').classList.add('hidden');
+    }
+
+    // Mobile Fullscreen Player View
+    function openMobileFullscreenPlayer() {
+      if (!currentEpisode) return;
+      updateFullscreenUI();
+      const modal = document.getElementById('mobile-fullscreen-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeMobileFullscreenPlayer() {
+      const modal = document.getElementById('mobile-fullscreen-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function updateFullscreenUI() {
+      if (!currentEpisode) return;
+      document.getElementById('fs-player-title').innerText = currentEpisode.title;
+      document.getElementById('fs-player-host').innerText = currentEpisode.host;
+      document.getElementById('fs-player-cover').src = normalizeCoverUrl(currentEpisode.cover);
+      updatePlayStateUI();
     }
 
     function handleSeek(val) {
